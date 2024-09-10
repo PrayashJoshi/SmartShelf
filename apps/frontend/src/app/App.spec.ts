@@ -11,6 +11,6 @@ describe('App', () => {
 
     await router.isReady();
 
-    expect(wrapper.text()).toContain('Welcome frontend 👋');
+    expect(wrapper.text()).toContain('Sign in');
   });
 });

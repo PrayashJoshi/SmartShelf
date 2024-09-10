@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router';
+import { store } from '../store.ts'
 </script>
 
 <template>
   <header>
-    <nav>
-      <RouterLink to="/">Home</RouterLink>
+    <nav v-if="store.loggedIn">
+      <!-- TODO: adjust to make user custom link -->
       <RouterLink to="/about">About</RouterLink>
+      <RouterLink to="/login">Logout</RouterLink>
     </nav>
   </header>
   <RouterView />
@@ -18,7 +20,7 @@ header {
   max-width: 100vw;
 }
 
-nav > a {
+nav>a {
   padding-left: 1rem;
   padding-right: 1rem;
 }

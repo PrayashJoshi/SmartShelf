@@ -1,4 +1,5 @@
 import './styles.css';
+import './index.css'
 
 import router from './router';
 
