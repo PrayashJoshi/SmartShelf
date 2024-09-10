@@ -16,14 +16,7 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "apps/api",
-        "command": "python3 -m venv dbms_api"
-      }
-    },
-    "freeze-requirements": {
-      "executor": "nx:run-commands",
-      "options": {
-        "cwd": "apps/api",
-        "command": "source dbms_api/bin/activate ; pip freeze > requirements.txt"
+        "command": "test -d dbms_api && (source dbms_api/bin/activate ; pipenv install) || (python3 -m venv dbms_api && (source dbms_api/bin/activate ; pip install pipenv ; pipenv install))"
       }
     }
   }

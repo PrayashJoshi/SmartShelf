@@ -1,1 +1,2 @@
-npx nx freeze-requirements api
+npx nx lint frontend
+npm run test:affected 
