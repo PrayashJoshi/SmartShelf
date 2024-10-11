@@ -9,7 +9,7 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "apps/api",
-        "command": "source dbms_api/bin/activate ; flask --app src/main run"
+        "command": "source dbms_api/bin/activate ; fastapi dev src/main.py"
       }
     },
     "setup-venv": {

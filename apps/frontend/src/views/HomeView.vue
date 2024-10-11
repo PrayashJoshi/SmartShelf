@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import Test from '../app/Test.vue'
+import Home from '../app/Home.vue'
 </script>
 
 <template>
-  <main class="about">
-    <Test/>
+  <main class="main">
+    <Home/>
   </main>
 </template>
 
 <style>
 @media (min-width: 768px) {
-  .about {
+  .main {
     max-width: 768px;
     margin-left: auto;
     margin-right: auto;

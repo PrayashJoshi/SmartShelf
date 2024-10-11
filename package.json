@@ -3,10 +3,12 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "prepare": "husky"
+    "prepare": "husky",
+    "test:affected": "npx vitest --changed $(git nearest-parent) --watch=false"
   },
   "private": true,
   "dependencies": {
+    "@vueuse/core": "^11.1.0",
     "axios": "^1.6.0",
     "tslib": "^2.3.0",
     "vue": "^3.3.4",

@@ -1,0 +1,133 @@
+@startchen SmartShelf ER Diagram
+
+entity USER {
+    User_ID <<key>>
+    Name
+    Email
+    Address
+    Dietary_Preferences
+    Registration_Date
+}
+
+entity GROCERY_RECEIPT {
+    Receipt_ID <<key>>
+    Date
+    Store_Location
+    User_ID
+    Total_Amount
+}
+
+entity GROCERY_ITEM {
+    Item_ID <<key>>
+    Name
+    Category
+    Expiry_Date
+    Quantity
+    Price
+    Nutrition_Facts
+}
+
+entity RECIPE {
+    Recipe_ID <<key>>
+    Name
+    Cuisine_Type
+    Cooking_Time
+    Difficulty_Level
+    Nutrition_Facts
+    Category
+}
+
+entity INGREDIENT {
+    Ingredient_ID <<key>>
+    Name
+    Quantity_Required
+    Measurement_Unit
+}
+
+entity NUTRITION_FACTS {
+    Nutrition_ID <<key>>
+    Calories
+    Fat
+    Carbohydrates
+    Protein
+}
+
+entity KROGER_PRODUCT {
+    Product_ID <<key>>
+    Name
+    Description
+    Price
+    Brand
+    Category
+}
+
+entity STORE {
+    Store_ID <<key>>
+    Store_Location
+    Store_Type
+}
+
+entity SHOPPING_LIST {
+    List_ID <<key>>
+    User_ID <<key>>
+    Created_Date
+    Status
+    Total_Amount
+}
+
+relationship IS_OWNER {
+}
+
+USER -N- IS_OWNER 
+IS_OWNER -1- GROCERY_RECEIPT 
+
+relationship MATCHED_TO {
+}
+
+INGREDIENT -1- MATCHED_TO
+MATCHED_TO -1- GROCERY_ITEM
+
+
+relationship RECEIVES_RECOMMENDATIONS {
+}
+
+USER -N- RECEIVES_RECOMMENDATIONS
+RECEIVES_RECOMMENDATIONS -M- RECIPE
+
+relationship IN_STORE {
+}
+
+GROCERY_ITEM -1- IN_STORE
+IN_STORE -1- KROGER_PRODUCT 
+
+relationship FROM {
+}
+
+GROCERY_RECEIPT -1- FROM
+FROM -N- STORE
+
+relationship CONTAINS {
+}
+
+GROCERY_RECEIPT -1- CONTAINS
+CONTAINS -N- GROCERY_ITEM
+
+relationship REQUIRES {
+}
+
+RECIPE -1- REQUIRES
+REQUIRES -N- INGREDIENT
+
+relationship DESCRIBES {
+}
+
+NUTRITION_FACTS -1- DESCRIBES
+DESCRIBES -1- GROCERY_ITEM 
+
+
+IS_OWNER -1- SHOPPING_LIST
+
+
+SHOPPING_LIST -1- CONTAINS
+
+@endchen

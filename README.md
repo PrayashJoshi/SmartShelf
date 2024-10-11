@@ -14,8 +14,9 @@ Would recommend creating an alias for the command `npx nx` because that is the c
 Eventually we will implement additional commands to build for Docker
 
 ### Commands For Flask Server
-
-`nx serve api` - Starts server
-`nx setup-venv api` - Installs requirements from pip and sets up venv (if it doesnt exist)
+- `nx serve api` - Starts server
+- `nx setup-venv api` - Installs requirements from pip and sets up venv (if it doesnt exist)
 
 ### Commands For Vue Server
+- `nx build frontend` - Builds frontend for prod
+- `nx serve frontend` - Starts server

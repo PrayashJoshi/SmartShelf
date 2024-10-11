@@ -9,7 +9,7 @@ defineProps<{
 let handleLogin = (e: Event) => {
   e.preventDefault()
   store.loggedIn = true
-  router.push('/about')
+  router.push('/')
 }
 
 </script>
