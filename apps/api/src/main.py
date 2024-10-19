@@ -2,14 +2,29 @@
 import sqlite3
 from typing import Union
 from fastapi import FastAPI, HTTPException
-# import json
-import logging
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+import json
 from datetime import datetime, timedelta
 import random
+import logging
 logger = logging.getLogger('')
 logging.basicConfig(format='%(levelname)s:\t  %(message)s',level=logging.DEBUG)
 
 app = FastAPI()
+
+origins = [
+    "http://localhost",
+    "http://localhost:4200",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Function to initialize the SQLite database and create tables
 @app.on_event("startup")
@@ -24,7 +39,7 @@ def init_db():
         CREATE TABLE IF NOT EXISTS User (
             user_id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
-            email TEXT,
+            email TEXT UNIQUE,
             address TEXT,
             reg_date DATE
         );
@@ -354,3 +369,50 @@ def get_cuisine_type(recipe_name: str):
     result = [dict(zip(column_names, row)) for row in res.fetchall()]
     conn.close()
     return result
+
+class User(BaseModel):
+    name: str
+    email: str 
+    address: str
+    date: str = datetime.now().strftime('%Y-%m-%d')
+
+@app.post('/users/add_user/')
+def add_user(user: User) -> str | dict:
+    logger.info(f'Adding new user {user.name}')
+    try:
+        conn = sqlite3.connect("smartshelf.db")
+        cursor = conn.cursor()
+
+        cursor.execute(f'''
+                        INSERT INTO User (name, email, address, reg_date) VALUES ('{user.name}', '{user.email}', '{user.address}', '{user.date}');
+                        ''')
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        logger.error(f'Cannot add new user {e}')
+        raise e
+    return 'ok'
+
+@app.get('/users/verify')
+def verify_user(email: str):
+    logger.info(f'Verifying email {email}')
+    try:
+        conn = sqlite3.connect("smartshelf.db")
+        cursor = conn.cursor()
+
+        res = cursor.execute(f'''
+                        SELECT user_id, name, email from User WHERE email = '{email}';
+                        ''')
+        
+        user = res.fetchone()
+        if user is None:
+            raise HTTPException(status_code=404, detail="User Not Found")
+        column_names = [description[0] for description in cursor.description]
+        result = dict(zip(column_names, user))
+        conn.close()
+
+        return result
+
+    except Exception as e:
+        logger.error(f'Cannot verify user {e}')
+        raise e

@@ -43,3 +43,5 @@ Thumbs.db
 
 apps/api/dbms_api
 apps/api/src/__pycache__
+
+apps/api/.env

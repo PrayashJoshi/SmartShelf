@@ -12,6 +12,21 @@
         "command": "source dbms_api/bin/activate ; fastapi dev src/main.py"
       }
     },
+    "install": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/api",
+        "command": "source dbms_api/bin/activate ; pipenv install",
+        "args": ""
+      }
+    },
+    "populate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/api",
+        "command": "source dbms_api/bin/activate ; python3 src/population.py"
+      }
+    },
     "setup-venv": {
       "executor": "nx:run-commands",
       "options": {

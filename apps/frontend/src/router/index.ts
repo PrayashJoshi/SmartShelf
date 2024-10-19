@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import Login from '../views/LoginView.vue';
 import { store } from '../store';
 import Upload from '../views/UploadView.vue';
+import NewUser from '../views/NewUserView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -23,14 +24,23 @@ const router = createRouter({
       path: '/upload',
       name: 'upload',
       component: Upload
+    },
+    {
+      path: '/new',
+      name: 'new',
+      component: NewUser
     }
   ],
 });
 
 router.beforeEach((to, from) => {
-  if (!store.loggedIn && to.name !== "login") {
+  if (!store.loggedIn && (to.name !== "login" && to.name !== "new")) {
     return { name: 'login' }
   }
+  if (store.loggedIn && to.name === "new") {
+    return { name: 'home' }
+  }
+
 })
 
 export default router;
