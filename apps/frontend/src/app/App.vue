@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router';
-import { store } from '../store.ts'
+import { store } from '../store'
 </script>
 
 <template>
   <header>
     <nav class="invisible lg:visible" v-if="store.loggedIn">
       <!-- TODO: adjust to make user custom link -->
-      <RouterLink to="/">About</RouterLink>
+      <RouterLink to="/">Home</RouterLink>
       <RouterLink to="/login">Logout</RouterLink>
     </nav>
   </header>
@@ -18,7 +18,7 @@ import { store } from '../store.ts'
       </div>
       <div class="flex items-center justify-between h-full mx-2 text-white">
         <!-- TODO: adjust to make user custom link -->
-        <RouterLink to="/">About</RouterLink>
+        <RouterLink to="/">Home</RouterLink>
         <RouterLink to="/login">Logout</RouterLink>
       </div>
     </nav>

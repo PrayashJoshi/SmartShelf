@@ -76,21 +76,18 @@ with open('src/test.csv', newline='') as csvfile:
         protein REAL
     );
 
-
     CREATE TABLE IF NOT EXISTS Ingredient (
         ingredient_id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         recipe_id INTEGER,
-        FOREIGN KEY (recipe_id) REFERENCES Recipe(recipe_id)
-        nutritional_id INTEGER,
-        FOREIGN KEY (nutritional_id) REFERENCES NutritionFact(nutrition_id)
+        nutrition_id INTEGER,
+        FOREIGN KEY (recipe_id) REFERENCES Recipe(recipe_id),
+        FOREIGN KEY (nutrition_id) REFERENCES NutritionFact(nutrition_id)
     );
 
     CREATE TABLE IF NOT EXISTS GroceryItem (
-        ingredient_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        ingredient_id INTEGER,
-        FOREIGN KEY (ingredient_id) REFERENCES Ingredient(ingredient_id)
+        grocery_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL
     );
 
     '''
@@ -124,7 +121,6 @@ with open('src/test.csv', newline='') as csvfile:
     logger.debug(f"Insert {title}")
     cursor.execute("INSERT INTO Recipe (name, category, cooking_time, url) VALUES (?, ?, ?, ?)", [title, category, row[2], "-".join(row[0].split())+f"-{row[1]}"])
     for ingredient in ast.literal_eval(row[10]):
-      cursor.execute("INSERT INTO Recipe (name, category, cooking_time, url) VALUES (?, ?, ?, ?)", [title, category, row[2], "-".join(row[0].split())+f"-{row[1]}"])
       res = requests.post(f"https://api.nal.usda.gov/fdc/v1/foods/search?api_key={os.getenv('NUTRITION_KEY')}", json={'query':f'{ingredient}'})
       nutrition_info = res.json()
       found = False
@@ -135,7 +131,7 @@ with open('src/test.csv', newline='') as csvfile:
           nutrients = food['foodNutrients']
           info = nutrient_info_helper(nutrients)
           logger.info(f"Insert {ingredient}: {info}")
-          cursor.execute("INSERT INTO NutritionFact (name, calories, fat, carbs, protein) VALUES (?, ?, ?, ?, ?)", 
+          cursor.execute("INSERT INTO NutritionFact (name, calories, fat, carbs, protein, recipe_id) VALUES (?, ?, ?, ?, ?)",
                          [ingredient.title(), info['calories'], info['fat'], info['carbs'], info['protein']])
           break
       # pull first manufactured ingredient
@@ -144,8 +140,12 @@ with open('src/test.csv', newline='') as csvfile:
         nutrients = food['foodNutrients']
         info = nutrient_info_helper(nutrients)
         logger.info(f"Insert {ingredient}: {info}")
-        cursor.execute("INSERT INTO NutritionFact (name, calories, fat, carbs, protein) VALUES (?, ?, ?, ?, ?)", 
+        cursor.execute("INSERT INTO NutritionFact (name, calories, fat, carbs, protein, recipe_id) VALUES (?, ?, ?, ?, ?)", 
                         [ingredient.title(), info['calories'], info['fat'], info['carbs'], info['protein']])
+      
+      cursor.execute("INSERT INTO Ingredient (name, recipe_id, nutrition_id) VALUES (?, ?, ?)", 
+                      [ingredient.title(), row_id])
+
     row_id += 1
 
   conn.commit()

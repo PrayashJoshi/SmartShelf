@@ -416,3 +416,8 @@ def verify_user(email: str):
     except Exception as e:
         logger.error(f'Cannot verify user {e}')
         raise e
+
+@app.post('/check_kroger')
+def kroger_product():
+    # TODO: call api
+    pass

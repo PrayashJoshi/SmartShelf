@@ -24,7 +24,7 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "apps/api",
-        "command": "source dbms_api/bin/activate ; python3 src/population.py"
+        "command": "source dbms_api/bin/activate ; python3 src/populate.py"
       }
     },
     "setup-venv": {

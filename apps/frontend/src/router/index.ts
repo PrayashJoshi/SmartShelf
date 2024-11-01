@@ -38,7 +38,7 @@ router.beforeEach((to, from) => {
     return { name: 'login' }
   }
   if (store.loggedIn && to.name === "new") {
-    return { name: 'home' }
+    return { name: '/' }
   }
 
 })

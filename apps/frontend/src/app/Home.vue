@@ -3,6 +3,7 @@ import { useObjectUrl } from '@vueuse/core'
 import { onMounted, shallowRef } from 'vue'
 
 import { store } from "../store"
+import router from '../router';
 
 const file = shallowRef()
 const url = useObjectUrl(file)
@@ -12,11 +13,15 @@ const getData = async () => {
   let foodImageData = await fetch('https://foodish-api.com/api/')
   let imageRes = await foodImageData.json()
   randomFoodSrc.value = imageRes.image
-  console.log(randomFoodSrc.value)
 }
 
 function onFileChange(event) {
   file.value = event.target.files[0]
+}
+
+async function handleClick() {
+  console.log(store.loggedIn)
+  await router.push('/upload') 
 }
 
 onMounted(()=> getData())
@@ -30,8 +35,10 @@ onMounted(()=> getData())
         Welcome Back, {{store.user.name}}!
       </h2>
 
-      <input type="file" id="upload" @change="onFileChange" hidden/>
-      <label class="hidden lg:inline mt-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-white" for="upload">Upload Receipt</label>
+      <!-- <input type="file" id="upload" @change="onFileChange" hidden/> -->
+      <button @click=handleClick class="hidden lg:inline mt-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-white" for="upload">
+          Upload Receipt
+      </button>
     </div>
 
     <div class="mt-4 lg:flex w-full lg:items-center lg:justify-between">
