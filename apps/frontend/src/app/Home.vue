@@ -1,4 +1,4 @@
-<script setup>
+<script setup >
 import { useObjectUrl } from '@vueuse/core'
 import { onMounted, shallowRef } from 'vue'
 
@@ -9,14 +9,11 @@ const file = shallowRef()
 const url = useObjectUrl(file)
 const randomFoodSrc = shallowRef([])
 
+
 const getData = async () => {
   let foodImageData = await fetch('https://foodish-api.com/api/')
   let imageRes = await foodImageData.json()
   randomFoodSrc.value = imageRes.image
-}
-
-function onFileChange(event) {
-  file.value = event.target.files[0]
 }
 
 async function handleClick() {
@@ -24,7 +21,43 @@ async function handleClick() {
   await router.push('/upload') 
 }
 
-onMounted(()=> getData())
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+} from 'chart.js'
+import { Line } from 'vue-chartjs'
+
+const data = {
+  labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+  datasets: [
+    {
+      label: 'Data One',
+      backgroundColor: '#f87979',
+      data: [40, 39, 10, 40, 39, 80, 40]
+    }
+  ]
+}
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  )
+
+onMounted(()=> {
+  getData()
+
+})
+
 </script>
 
 
@@ -43,10 +76,11 @@ onMounted(()=> getData())
 
     <div class="mt-4 lg:flex w-full lg:items-center lg:justify-between">
       <h2 class="text-xl font-bold leading-7 text-gray-900 sm:truncate sm:text-2xl sm:tracking-tight">
-        Recipe Of The Day
+        Your Receipts 
       </h2>
     </div>
 
-    <img class="mt-4 h-64 w-full object-fill" src="https://foodish-api.com/images/pasta/pasta8.jpg"/>
+    <Line :data="data" />
+
   </div>
 </template>

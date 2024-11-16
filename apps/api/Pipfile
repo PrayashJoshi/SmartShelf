@@ -13,6 +13,8 @@ markupsafe = "==2.1.5"
 werkzeug = "==3.0.4"
 fastapi = {extras = ["standard"], version = "*"}
 python-dotenv = "*"
+requests = "*"
+shortuuid = "*"
 
 [dev-packages]
 

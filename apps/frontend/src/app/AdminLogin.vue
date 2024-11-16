@@ -8,27 +8,15 @@ defineProps<{
 }>();
 const email = ref('')
 
-let error = ref(false)
-
-let handleLogin = async () => {
+let handleLogin = async (e: Event) => {
   try {
-    const res = await fetch('http://127.0.0.1:8000/users/verify?' + new URLSearchParams({
-      'email': email.value
-    }).toString())
 
-    if (res.ok) {
+    if (email.value === "admin@ohyeah.com") {
       store.loggedIn = true
-      let data: User = await res.json()
-      store.user = data
-      await router.push('/')
-    }
-    else {
-      console.log(error)
-      error.value = true
+      await router.push('/admin/dash')
     }
   }
   catch(e) {
-    error.value = true
     console.log(e)
   }
 }
@@ -39,7 +27,7 @@ let handleLogin = async () => {
   <div class="flex min-h-full flex-col justify-center px-6 py-12 mt-12 lg:px-8">
     <div class="sm:mx-auto sm:w-full sm:max-w-sm">
       <h2 class="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
-        Sign in to your account
+        Administrative Login
       </h2>
     </div>
 
@@ -54,18 +42,10 @@ let handleLogin = async () => {
         </div>
         <div>
           <button type="submit"
-            class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Sign
+            class="flex w-full justify-center rounded-md bg-red-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Sign
             in</button>
         </div>
       </form>
-
-      <p v-show="error" class="text-red-400 mt-5">We cant find that email, try another email or sign up</p>
-
-      <p class="mt-10 text-center text-sm text-gray-500">
-        Not a member?
-        <a href="/new" class="font-semibold leading-6 text-indigo-600 hover:text-indigo-500">Create an Account</a>
-      </p>
-
-    </div>
+  </div>
   </div>
 </template>
