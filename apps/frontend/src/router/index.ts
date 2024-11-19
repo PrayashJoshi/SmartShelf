@@ -5,6 +5,7 @@ import Upload from '../views/UploadView.vue';
 import NewUser from '../views/NewUserView.vue';
 import AdminLogin from '../app/AdminLogin.vue';
 import AdminView from '../views/AdminView.vue';
+import ReceiptView from '../views/ReceiptView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -33,6 +34,11 @@ const router = createRouter({
       component: NewUser
     },
     {
+      path: '/receipt',
+      name: 'receipt',
+      component: ReceiptView
+    },
+    {
       path: '/admin',
       name: 'admin',
       component: AdminLogin
@@ -52,7 +58,6 @@ router.beforeEach((to, from) => {
   if (store.loggedIn && to.name === "new") {
     return { name: '/' }
   }
-
 })
 
 export default router;

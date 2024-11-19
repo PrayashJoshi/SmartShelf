@@ -12,12 +12,7 @@ import { store } from '../store'
     </nav>
   </header>
   <RouterView />
-    <nav class="visible absolute inset-x-0 bottom-0 h-12 bg-indigo-600 lg:invisible" v-if="store.loggedIn">
-      <div class="absolute left-0 right-0 bottom-5 ms-auto me-auto w-fit">
-        <RouterLink to="/upload">
-          <button class="bg-indigo-400 w-10 h-10 text-white rounded-full">+</button>
-        </RouterLink>
-      </div>
+    <nav class="visible fixed inset-x-0 bottom-0 h-12 bg-indigo-600 lg:invisible" v-if="store.loggedIn">
       <div class="flex items-center justify-between h-full mx-2 text-white">
         <!-- TODO: adjust to make user custom link -->
         <RouterLink to="/">Home</RouterLink>

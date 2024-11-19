@@ -19,7 +19,8 @@ let users = ref();
 let mounted = ref(false)
 let userSignupData: any;
 let userReceiptData: any;
-onMounted(async() => {
+
+async function getData() {
   const apiData = await fetch("http://127.0.0.1:8000/monthly_signups")
   const data = await apiData.json()
   userSignupData = {
@@ -29,7 +30,7 @@ onMounted(async() => {
         label: 'Signups',
         backgroundColor: '#f87979',
         data: data.map((user:any) => user.signups)
-      },
+      }
     ]
   }
 
@@ -43,10 +44,13 @@ onMounted(async() => {
       },
     ]
   }
-  mounted.value = true
 
   console.log(mounted.value)
   console.log(users.value)
+}
+onMounted(async () => {
+  await getData()
+  mounted.value = true
 })
 
 </script>

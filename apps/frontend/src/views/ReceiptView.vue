@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import Home from '../app/Home.vue'
+import Receipt from '../app/Receipt.vue'
 </script>
 
 <template>
   <main class="main">
-    <Home/>
+    <Receipt/>
   </main>
 </template>
 
@@ -15,7 +15,6 @@ import Home from '../app/Home.vue'
     margin-left: auto;
     margin-right: auto;
     padding: 0 1rem;
-    height: 1dvh
   }
 }
 </style>

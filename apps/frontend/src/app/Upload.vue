@@ -1,9 +1,10 @@
 <script lang="ts" setup>
   import { ref, onMounted, watch } from "vue";
+import { store } from "../store";
 
   type Ingredient = {
     name: string,
-    price: string
+    price: number
   }
 
   const ingredients = ref<Ingredient[]>([]);
@@ -16,7 +17,7 @@
 
     ingredients.value.unshift({
       name: text.value,
-      price: price.value
+      price: Number.parseFloat(price.value)
     });
 
     text.value = "";
@@ -29,12 +30,28 @@
   }
 
   async function upload() {
-    const res = await fetch('http://localhost:8000/users/add_user', {
+    const res = await fetch('http://localhost:8000/receipts/add_receipt', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-      }),
+        ingredients: ingredients.value, 
+        user_id: store.user.user_id
+      })
     })
+
+    if (res.ok) {
+      ingredients.value = []
+    }
+
+    console.log(store.user.user_id)
+  }
+
+  function sumTotal() {
+    let sum = 0
+    for(let ingredient of ingredients.value){
+      sum += ingredient.price
+    }
+    return sum.toFixed(2);
   }
 
 </script>
@@ -84,10 +101,14 @@
         </div>
       </div>
     </div>
-    
-      <button class="w-full lg:inline mt-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-white" @onclick="upload">
-          Upload Receipt
-      </button>
+
+    <h3 class="text-lg font-bold leading-7 mt-8 mb-2 text-gray-900 sm:truncate sm:text-2xl sm:tracking-tight">
+      Total: {{ sumTotal() }}
+    </h3>
+  
+    <button class="w-full lg:inline mt-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-white" @click.prevent="upload()">
+        Upload Receipt
+    </button>
 
   </div>
 </template>

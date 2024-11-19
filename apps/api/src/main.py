@@ -76,7 +76,7 @@ def get_cuisine_type(recipe_name: str):
 HTTPS requests pertaining to Users
 '''
 
-@app.get('/monthly_signups')
+@app.get('/users/monthly_signups')
 def get_users():
     conn = sqlite3.connect("smartshelf.db")
     cursor = conn.cursor()
@@ -144,12 +144,16 @@ def kroger_product():
     # TODO: call api
     pass
 
+'''
+HTTPS requests pertaining to Receipts
+'''
 class ReceiptItem(BaseModel):
     name: str
     price: float
 class Receipt(BaseModel):
     ingredients: List[ReceiptItem]
     date: str = datetime.now().strftime('%Y-%m-%d')
+    user_id: int
 
 @app.post('/receipts/add_receipt')
 def add_receipt(receipt: Receipt):
@@ -157,14 +161,76 @@ def add_receipt(receipt: Receipt):
         conn = sqlite3.connect("smartshelf.db")
         cursor = conn.cursor()
         id = shortuuid.ShortUUID().random(length=32)
-        for item in receipt:
+        for item in receipt.ingredients:
+            print(item)
             cursor.execute(f'''
-                           INSERT INTO Receipt(receipt_id, name, price) 
-                           VALUES ('{id}', '{item.name}', '{item.price}');
+                           INSERT INTO Receipt(receipt_id, name, price, add_date, user_id) 
+                           VALUES ('{id}', '{item.name}', '{item.price}',  '{receipt.date}', '{receipt.user_id}');
                            ''')
-            conn.commit()
 
+        conn.commit()
         conn.close()
         return 'ok'
-    except: 
-        print("uhoh")
+    except Exception as e: 
+        print(e)
+        return e
+
+@app.get('/receipts/receipt_history')
+def receipt_history(user_id: int):
+    try:
+        conn = sqlite3.connect("smartshelf.db")
+        cursor = conn.cursor()
+        res = cursor.execute(f'''
+                            SELECT receipt_id, add_date, COUNT(*) as items, SUM(price) as total
+                            FROM Receipt
+                            WHERE Receipt.user_id == \'{user_id}\'
+                            GROUP BY receipt_id
+                            ORDER BY add_date DESC;
+                            ''')
+
+        column_names = [description[0] for description in cursor.description]
+        result = [dict(zip(column_names, row)) for row in res.fetchall()]
+        conn.close()
+        return result
+    except Exception as e: 
+        print(e)
+        return e
+
+@app.get('/receipts/price_history/{year}')
+def price_history(year: int, user_id: int):
+    try:
+        conn = sqlite3.connect("smartshelf.db")
+        cursor = conn.cursor()
+        res = cursor.execute(f'''
+                            SELECT SUM(price) as total, strftime('%m', add_date) AS month, strftime('%Y', add_date) AS year
+                            FROM Receipt
+                            WHERE Receipt.user_id == \'{user_id}\' AND year == \'{year}\'
+                            GROUP BY month
+                            ''')
+
+        column_names = [description[0] for description in cursor.description]
+        result = [dict(zip(column_names, row)) for row in res.fetchall()]
+        conn.close()
+        return result
+    except Exception as e: 
+        print(e)
+        return e
+
+@app.get('/receipts/receipt/{receipt_id}')
+def receipt_for_user(user_id: int, receipt_id: str):
+    try:
+        conn = sqlite3.connect("smartshelf.db")
+        cursor = conn.cursor()
+        res = cursor.execute(f'''
+                            SELECT name, price
+                            FROM Receipt
+                            WHERE user_id == \'{user_id}\' AND receipt_id == \'{receipt_id}\';
+                            ''')
+
+        column_names = [description[0] for description in cursor.description]
+        result = [dict(zip(column_names, row)) for row in res.fetchall()]
+        conn.close()
+        return result
+    except Exception as e: 
+        print(e)
+        return e

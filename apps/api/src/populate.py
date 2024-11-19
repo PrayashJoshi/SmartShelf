@@ -98,9 +98,12 @@ def populate():
       );
 
       CREATE TABLE IF NOT EXISTS Receipt (
-          receipt_id TEXT PRIMARY KEY,
+          receipt_id TEXT,
           name TEXT NOT NULL,
           price FLOAT NOT NULL,
+          add_date DATE NOT NULL,
+          user_id INTEGER NOT NULL,
+          FOREIGN KEY (user_id) REFERENCES User(user_id)
       );
 
       '''
