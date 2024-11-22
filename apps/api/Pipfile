@@ -15,6 +15,9 @@ fastapi = {extras = ["standard"], version = "*"}
 python-dotenv = "*"
 requests = "*"
 shortuuid = "*"
+starlette = "*"
+pydantic = "*"
+levenshtein = "*"
 
 [dev-packages]
 

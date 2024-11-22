@@ -18,10 +18,23 @@ const receiptHistory = shallowRef([])
 let rendered = shallowRef(false)
 let data;
 const getData = async () => {
-  receiptHistory.value = await (await fetch(`http://localhost:8000/receipts/receipt_history?user_id=${store.user.user_id}`)).json()
+  receiptHistory.value = await (
+    await fetch('http://127.0.0.1:8000/receipts/receipt_history?' + 
+        new URLSearchParams({
+          'user_id': store.user.user_id 
+        })
+    )).json()
+
   console.log(receiptHistory.value)
 
-  const priceHistoryData = await (await fetch(`http://localhost:8000/receipts/price_history/2024?user_id=${store.user.user_id}`)).json()
+  const priceHistoryData = await (
+    await fetch('http://127.0.0.1:8000/receipts/price_history/2024?' + 
+        new URLSearchParams({
+          'user_id': store.user.user_id 
+        })
+    )).json()
+  
+  console.log(priceHistoryData)
 
   data = {
     labels: priceHistoryData.map((item) => item.month),

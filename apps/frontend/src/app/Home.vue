@@ -1,10 +1,11 @@
 <script setup >
 import { store } from "../store"
 import router from '../router';
+import RecipeComponent from "./RecipeComponent.vue"
 
 async function handleUploadClick() {
   console.log(store.loggedIn)
-  await router.push('/upload') 
+  await router.push('/upload')
 }
 
 async function handleReceiptClick() {
@@ -20,14 +21,10 @@ async function handleReceiptClick() {
       <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
         Welcome Back, {{store.user.name}}!
       </h2>
-
-      <!-- <input type="file" id="upload" @change="onFileChange" hidden/> -->
     </div>
-    <!-- <button @click=handleClick class="hidden lg:inline mt-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-white" for="upload">
-      Upload Receipt
-    </button> -->
-
-    <button @click=handleUploadClick class="w-full max-h-32 bg-indigo-500 px-4 grid place-content-center grid-cols-2 mt-8 mb-8 rounded-md hover:bg-indigo-400">
+    <button @click=handleUploadClick class="w-full max-h-32 bg-indigo-500 px-4
+        grid place-content-center grid-cols-2 mt-8 mb-8 rounded-md group
+        hover:scale-105 hover:shadow-md">
       <div class="flex flex-col align-middle justify-center">
         <h2 class="text-white sm:text-xl text-left font-bold">
           Add New Receipts
@@ -37,7 +34,7 @@ async function handleReceiptClick() {
         </p>
       </div>
       <div class="flex pb-8 h-48 align-center justify-center">
-        <image src="/assets/receipt.png"/>
+        <image class="group-hover:scale-110" src="/assets/receipt.png"/>
       </div>
     </button>
 
@@ -47,28 +44,13 @@ async function handleReceiptClick() {
       </h2>
     </div>
 
+    <RecipeComponent/>
 
-    <div class="mt-4 flex gap-1 overflow-x-scroll max-w-full no-scrollbar">
-      <div class="min-w-52 sm:w-64 h-72 border-2 rounded-md">
-        <h2>Title</h2>
-      </div>
-      <div class="min-w-52 sm:w-64 h-72 border-2 rounded-md">
-        <h2>Title</h2>
-      </div>
-      <div class="min-w-52 sm:w-64 h-72 border-2 rounded-md">
-        <h2>Title</h2>
-      </div>
-      <div class="min-w-52 sm:w-64 h-72 border-2 rounded-md">
-        <h2>Title</h2>
-      </div>
-      <div class="min-w-52 sm:w-64 h-72 border-2 rounded-md">
-        <h2>Title</h2>
-      </div>
-    </div>
-
-    <button @click=handleReceiptClick class="w-full max-h-32 bg-lime-500 px-4 grid place-content-center grid-cols-3 mt-12 mb-16 sm:mb-8 rounded-md hover:bg-lime-400">
+    <button @click=handleReceiptClick class="w-full max-h-32 bg-lime-500 px-4 grid 
+        place-content-center grid-cols-3 mt-12 mb-16 sm:mb-8 rounded-md
+        hover:scale-105 hover:shadow-md group">
       <div class="flex pb-8 h-48 align-center justify-start">
-        <image src="/assets/history.png"/>
+        <image class="group-hover:scale-110" src="/assets/history.png"/>
       </div>
       <div class="flex flex-col align-start justify-center col-span-2">
         <h2 class="text-white sm:text-xl text-left font-bold">
