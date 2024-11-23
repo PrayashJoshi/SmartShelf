@@ -62,6 +62,7 @@ def generate_schemas(cursor, conn):
       CREATE TABLE IF NOT EXISTS NutritionFact (
           nutrition_id INTEGER PRIMARY KEY AUTOINCREMENT,
           name TEXT,
+          guess TEXT,
           calories REAL,
           fat REAL,
           carbs REAL,
@@ -184,19 +185,20 @@ def populate_food(cursor, conn):
                     },
                 )
                 nutrition_info = res.json()
-                title = ''
+                title = ""
 
-                if (len(nutrition_info["foods"]) > 0):
+                if len(nutrition_info["foods"]) > 0:
                     # search raw ingredients
                     food = nutrition_info["foods"][0]
                     nutrients = food["foodNutrients"]
                     info = nutrient_info_helper(nutrients)
                     print(food["description"], ingredient)
                     title = food["description"]
-                    logger.info(f"Insert {title}: {info}")
+                    logger.info(f"Insert {ingredient.title()}: {info}")
                     cursor.execute(
-                        "INSERT INTO NutritionFact (name, calories, fat, carbs, protein) VALUES (?, ?, ?, ?, ?)",  # noqa: E501
+                        "INSERT INTO NutritionFact (name, guess, calories, fat, carbs, protein) VALUES (?,?, ?, ?, ?, ?)",  # noqa: E501
                         [
+                            ingredient.title(),
                             title,
                             info["calories"],
                             info["fat"],
@@ -207,9 +209,7 @@ def populate_food(cursor, conn):
                 else:
                     res = requests.post(
                         f"https://api.nal.usda.gov/fdc/v1/foods/search?api_key={os.getenv('NUTRITION_KEY')}",  # noqa: E501
-                        json={
-                            "query": f"{ingredient}"
-                        }
+                        json={"query": f"{ingredient}"},
                     )
                     nutrition_info = res.json()
                     food = nutrition_info["foods"][0]
@@ -217,10 +217,11 @@ def populate_food(cursor, conn):
                     info = nutrient_info_helper(nutrients)
                     print(food["description"], ingredient)
                     title = food["description"]
-                    logger.info(f"Insert {title}: {info}")
+                    logger.info(f"Insert {ingredient}: {info}")
                     cursor.execute(
-                        "INSERT INTO NutritionFact (name, calories, fat, carbs, protein) VALUES (?, ?, ?, ?, ?)",  # noqa: E501
+                        "INSERT INTO NutritionFact (name, guess, calories, fat, carbs, protein) VALUES (?, ?, ?, ?, ?, ?)",  # noqa: E501
                         [
+                            ingredient.title(),
                             title,
                             info["calories"],
                             info["fat"],
@@ -231,7 +232,7 @@ def populate_food(cursor, conn):
 
                 cursor.execute(
                     "INSERT INTO Ingredient (name, recipe_id, nutrition_id) VALUES (?, ?, ?)",  # noqa: E501
-                    [title, row_id, nutrition_id],
+                    [ingredient.title(), row_id, nutrition_id],
                 )
                 nutrition_id += 1
             row_id += 1
@@ -258,9 +259,7 @@ def populate():
     logger.info("Attempting To Populate User Table")
     populate_users(cursor, conn)
 
-    logger.info(
-        "Attempting to Populate Recipe, Ingredient, and Nutrition Facts"
-    )
+    logger.info("Attempting to Populate Recipe, Ingredient, and Nutrition Facts")
     populate_food(cursor, conn)
 
     conn.close()

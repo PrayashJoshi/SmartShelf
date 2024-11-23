@@ -307,3 +307,23 @@ def get_receipt_for_user(user_id: int, receipt_id: str):
     except Exception as e:
         print(e)
         return e
+
+
+@app.get('/ingredients/{recipe_id}')
+def get_ingredients_for_recipe(recipe_id: int):
+    try:
+        conn = sqlite3.connect("smartshelf.db")
+        cursor = conn.cursor()
+        res = cursor.execute(f'''
+                            SELECT *
+                            FROM Ingredient
+                            WHERE recipe_id == \'{recipe_id}\';
+                            ''')
+
+        column_names = [description[0] for description in cursor.description]
+        result = [dict(zip(column_names, row)) for row in res.fetchall()]
+        conn.close()
+        return result
+    except Exception as e:
+        print(e)
+        return e
