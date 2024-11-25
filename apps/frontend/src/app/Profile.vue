@@ -15,14 +15,14 @@ let error = ref(false)
 let handleUpdate = async () => {
   const hashedPass = await digestMessage(password.value)
   try {
-    const res = await fetch('http://127.0.0.1:8000/users/verify?' + new URLSearchParams({
+    const res = await fetch('http://127.0.0.1:8000/api/v1/users/verify?' + new URLSearchParams({
       'email': email.value,
       'password': hashedPass 
     }).toString())
 
     if (res.ok) {
       const secondRes = await
-      fetch(`http://127.0.0.1:8000/users/update?id=${store.user.user_id}`, {
+      fetch(`http://127.0.0.1:8000/api/v1/users/update?id=${store.user.user_id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

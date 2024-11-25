@@ -10,7 +10,7 @@ const password = ref('')
 let handleSignup = async (e: Event) => {
   e.preventDefault()
   try {
-    const res = await fetch('http://localhost:8000/users/add_user', {
+    const res = await fetch('http://localhost:8000/api/v1/users/add_user', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

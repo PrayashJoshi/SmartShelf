@@ -9,7 +9,7 @@
   
   async function getData() {
     recipes.value = await (
-      await fetch('http://127.0.0.1:8000/recipes/random')
+      await fetch('http://127.0.0.1:8000/api/v1/recipes/random')
       ).json()
     console.log(recipes.value)
   }
@@ -18,7 +18,7 @@
     modalRecipe.value = recipe
     console.log(modalRecipe.value)
     const ingredientData = await (
-      await fetch(`http://127.0.0.1:8000/ingredients/${recipe.recipe_id}`)
+      await fetch(`http://127.0.0.1:8000/api/v1/recipes/ingredients/${recipe.recipe_id}`)
     ).json()
 
     const imgData = await (

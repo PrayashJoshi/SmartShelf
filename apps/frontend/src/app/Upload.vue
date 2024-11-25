@@ -30,7 +30,7 @@ import { store } from "../store";
   }
 
   async function upload() {
-    const res = await fetch('http://127.0.0.1:8000/receipts/add_receipt', {
+    const res = await fetch('http://127.0.0.1:8000/api/v1/receipts/add_receipt', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -49,7 +49,7 @@ import { store } from "../store";
   function sumTotal() {
     let sum = 0
     for(let ingredient of ingredients.value){
-      sum += Number.parseFloat(ingredient.price)
+      sum += ingredient.price
     }
     return sum.toFixed(2);
   }

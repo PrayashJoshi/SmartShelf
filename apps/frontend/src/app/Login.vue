@@ -15,16 +15,20 @@ let error = ref(false)
 let handleLogin = async () => {
   try {
     const hashedPass = await digestMessage(pass.value)
-    const res = await fetch('http://127.0.0.1:8000/users/verify?' + new URLSearchParams({
-      'email': email.value,
-      'password': hashedPass
-    }).toString())
+    const res = await fetch(
+      'http://127.0.0.1:8000/api/v1/users/verify?'+
+        new URLSearchParams({
+          'email': email.value,
+          'password': hashedPass
+        })
+    )
 
     if (res.ok) {
       store.loggedIn = true
       let data: User = await res.json()
       store.user = data
       console.log(hashedPass)
+      console.log(data)
 
       await router.push('/')
     }

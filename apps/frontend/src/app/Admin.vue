@@ -21,7 +21,7 @@ let userSignupData: any;
 let userReceiptData: any;
 
 async function getData() {
-  const apiData = await fetch("http://127.0.0.1:8000/monthly_signups")
+  const apiData = await fetch("http://127.0.0.1:8000/api/v1/users/monthly_signups")
   const data = await apiData.json()
   userSignupData = {
     labels: data.map((user:{signup_date: string}) => user.signup_date),

@@ -56,7 +56,7 @@ class UserPipeline:
             cursor.commit()
             conn.close()
 
-    def verify_credentials(self, email: str, password: str) -> bool:
+    def verify_credentials(self, email: str, password: str):
         """Verify the user credentials on login and password changes"""
         conn = self._get_db_connection()
         cursor = conn.cursor()
@@ -72,7 +72,7 @@ class UserPipeline:
             user = res.fetchone()
             if user is None:
                 raise DatabaseError("User Not Found")
-            return True
+            return user
         except Exception as e:
             logger.error(f"Cannot verify user {e}")
             raise e

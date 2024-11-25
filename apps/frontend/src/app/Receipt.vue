@@ -19,7 +19,7 @@ let rendered = shallowRef(false)
 let data;
 const getData = async () => {
   receiptHistory.value = await (
-    await fetch('http://127.0.0.1:8000/receipts/receipt_history?' + 
+    await fetch('http://127.0.0.1:8000/api/v1/receipts/receipt_history?' + 
         new URLSearchParams({
           'user_id': store.user.user_id 
         })
@@ -28,7 +28,7 @@ const getData = async () => {
   console.log(receiptHistory.value)
 
   const priceHistoryData = await (
-    await fetch('http://127.0.0.1:8000/receipts/price_history/2024?' + 
+    await fetch('http://127.0.0.1:8000/api/v1/receipts/price_history/2024?' + 
         new URLSearchParams({
           'user_id': store.user.user_id 
         })

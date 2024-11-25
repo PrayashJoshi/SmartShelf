@@ -120,8 +120,8 @@ class Populate:
         logger.info("Attempting to Populate Nutrition Facts")
         self.populate_nutrition_facts()
         logger.info("Attempting to Populate Kroger Products")
-        self.populate_kroger()
-        logger.info("Attempting to Populate Grocery Items")
+        # self.populate_kroger()
+        # logger.info("Attempting to Populate Grocery Items")
 
     def populate_users(self):
         res = self.cursor.execute("SELECT COUNT(*) as num from User")
