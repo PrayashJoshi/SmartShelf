@@ -1,179 +1,250 @@
-import requests
-import base64
-from typing import Dict, List, Optional
-from dataclasses import dataclass
+import sqlite3
+from typing import List, Dict, Optional
 import logging
-from datetime import datetime, timedelta
+from dataclasses import dataclass
+from datetime import datetime
+from .kroger_api_utils import KrogerAPI, KrogerProduct, KrogerAPIError
+from errors import DatabaseError
 
 logger = logging.getLogger(__name__)
 
 
 @dataclass
-class KrogerProduct:
-    """Data class for Kroger product information"""
-
-    product_id: int
+class IngredientDetail:
+    ingredient_id: int
     name: str
-    description: str
-    price: float
+    quantity: float
+    measurement_unit: str
+    recipe_id: int
+
+
+@dataclass
+class ShoppingListItem:
+    ingredient_name: str
+    quantity: float
+    measurement_unit: str
+    product_name: str
     brand: str
+    price: float
     category: str
-
-    def to_dict(self) -> Dict:
-        """Convert product to dictionary"""
-        return {
-            "product_id": self.product_id,
-            "name": self.name,
-            "description": self.description,
-            "price": self.price,
-            "brand": self.brand,
-            "category": self.category,
-        }
-
-    @classmethod
-    def from_api_response(cls, data: Dict) -> "KrogerProduct":
-        """Create KrogerProduct from API response data"""
-        items = data.get("items", [{}])
-        price = items[0].get("price", {}).get("regular", 0.0) if items else 0.0
-        return cls(
-            product_id=int(data.get("productId", 0)),
-            name=data.get("description", ""),
-            description=data.get("description", ""),
-            price=price,
-            brand=data.get("brand", ""),
-            category=data.get("categories", [""])[0] if data.get("categories") else "",
-        )
+    store_location: Optional[str] = None
 
 
-class KrogerAPIError(Exception):
-    """Custom exception for Kroger API errors"""
+class KrogerPipeline:
+    def __init__(self, client_id: str, client_secret: str, location_id: str, db_path: str = "smartshelf.db"):
+        self.api = KrogerAPI(client_id, client_secret)
+        self.location_id = location_id
+        self.db_path = db_path
+        self.api.get_access_token()  # Ensure token is ready
+        logger.info(f"Initialized KrogerPipeline with location_id: {location_id}")
 
-    def __init__(self, message: str, status_code: int = None):
-        self.message = message
-        self.status_code = status_code
-        super().__init__(self.message)
-
-
-class KrogerAPI:
-    """Handler for Kroger API interactions with improved error handling"""
-
-    def __init__(self, client_id: str, client_secret: str):
-        if not client_id or not client_secret:
-            raise ValueError("Kroger API credentials are required")
-
-        self.client_id = client_id
-        self.client_secret = client_secret
-        self.base_url = "https://api-ce.kroger.com/v1"
-        self.access_token = None
-        self.token_expiry = None
-        self.calls_remaining = 10000
-        self.rate_limit_reset = datetime.now() + timedelta(days=1)
-
-    def _get_auth_header(self) -> Dict[str, str]:
-        """Get base64 encoded authorization header"""
-        credentials = f"{self.client_id}:{self.client_secret}"
-        encoded_credentials = base64.b64encode(credentials.encode()).decode()
-        return {"Authorization": f"Basic {encoded_credentials}"}
-
-    def _check_rate_limit(self):
-        """Check and manage rate limiting"""
-        now = datetime.now()
-        if now >= self.rate_limit_reset:
-            self.calls_remaining = 10000
-            self.rate_limit_reset = now + timedelta(days=1)
-
-        if self.calls_remaining <= 0:
-            raise KrogerAPIError(
-                "Rate limit exceeded. Please try again tomorrow.", status_code=429
-            )
-
-        self.calls_remaining -= 1
-
-    def get_access_token(self) -> str:
-        """Get access token using client credentials flow"""
-        url = f"{self.base_url}/connect/oauth2/token"
-        headers = {
-            **self._get_auth_header(),
-            "Content-Type": "application/x-www-form-urlencoded",
-        }
-        data = {"grant_type": "client_credentials", "scope": "product.compact"}
-
+    def _get_db_connection(self):
         try:
-            response = requests.post(url, headers=headers, data=data)
-            response.raise_for_status()
-            token_data = response.json()
+            conn = sqlite3.connect(self.db_path)
+            conn.row_factory = sqlite3.Row
+            return conn
+        except sqlite3.Error as e:
+            logger.error(f"Database connection error: {e}")
+            raise DatabaseError(f"Failed to connect to database: {str(e)}")
 
-            self.access_token = token_data.get("access_token")
-            self.token_expiry = datetime.now() + timedelta(
-                seconds=token_data.get("expires_in", 3600) - 60
-            )
-
-            logger.info("Successfully obtained access token")
-            return self.access_token
-
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Failed to get access token: {str(e)}")
-            if hasattr(e.response, "text"):
-                logger.error(f"Response content: {e.response.text}")
-            raise KrogerAPIError(
-                "Failed to authenticate with Kroger API", status_code=401
-            )
-
-    def _ensure_valid_token(self):
-        """Ensure we have a valid access token"""
-        if not self.access_token or (
-            self.token_expiry and datetime.now() >= self.token_expiry
-        ):
-            self.get_access_token()
-
-    def search_products(
-        self, ingredient: str, location_id: str, limit: int = 5
-    ) -> List[KrogerProduct]:
-        """Search for products matching an ingredient"""
-        self._check_rate_limit()
-        self._ensure_valid_token()
-
-        url = f"{self.base_url}/products"
-        headers = {
-            "Accept": "application/json",
-            "Authorization": f"Bearer {self.access_token}",
-        }
-        params = {
-            "filter.term": ingredient,
-            "filter.locationId": location_id,
-            "filter.limit": limit,
-        }
-
+    def find_kroger_product(self, ingredient: IngredientDetail) -> Optional[KrogerProduct]:
+        """Search for Kroger product matching ingredient"""
         try:
-            logger.debug(f"Searching products: {params}")
-            response = requests.get(url, headers=headers, params=params)
-
-            if response.status_code == 401:
-                # Token expired, retry once
-                self.get_access_token()
-                headers["Authorization"] = f"Bearer {self.access_token}"
-                response = requests.get(url, headers=headers, params=params)
-
-            response.raise_for_status()
-            data = response.json()
-
-            products = []
-            for item in data.get("data", []):
-                try:
-                    product = KrogerProduct.from_api_response(item)
-                    products.append(product)
-                except Exception as e:
-                    logger.error(f"Error processing product data: {e}")
-                    continue
-
-            return products
-
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Product search failed: {str(e)}")
-            if hasattr(e.response, "text"):
-                logger.error(f"Response content: {e.response.text}")
-            if e.response.status_code == 429:
-                raise KrogerAPIError("Rate limit exceeded", status_code=429)
-            raise KrogerAPIError(
-                "Failed to search products", status_code=e.response.status_code
+            products = self.api.search_products(
+                ingredient=ingredient.name,
+                location_id=self.location_id,
+                limit=1
             )
+            return products[0] if products else None
+        except Exception as e:
+            logger.error(f"Error finding product for {ingredient.name}: {e}")
+            return None
+
+    def save_kroger_product(self, product: KrogerProduct) -> int:
+        """Save Kroger product to database"""
+        conn = self._get_db_connection()
+        cursor = conn.cursor()
+        try:
+            # Check if product exists
+            cursor.execute("""
+                SELECT product_id FROM KrogerProduct
+                WHERE name = ? AND brand = ?
+            """, (product.name, product.brand))
+            existing = cursor.fetchone()
+            if existing:
+                return existing['product_id']
+            # Insert new product
+            cursor.execute("""
+                INSERT INTO KrogerProduct (name, description, price, brand, category)
+                VALUES (?, ?, ?, ?, ?)
+            """, (
+                product.name,
+                product.description,
+                product.price,
+                product.brand,
+                product.category
+            ))
+            product_id = cursor.lastrowid
+            conn.commit()
+            return product_id
+        finally:
+            conn.close()
+
+    def link_ingredient_to_product(self, ingredient: IngredientDetail, kroger_product_id: int) -> bool:
+        """Create grocery item linking ingredient to Kroger product"""
+        conn = self._get_db_connection()
+        cursor = conn.cursor()
+        try:
+            # Check if link exists
+            cursor.execute("""
+                SELECT item_id FROM GroceryItem 
+                WHERE ingredient_id = ? AND kroger_product = ?
+            """, (ingredient.ingredient_id, kroger_product_id))
+            if not cursor.fetchone():
+                # Create new link
+                cursor.execute("""
+                    INSERT INTO GroceryItem (name, ingredient_id, kroger_product)
+                    VALUES (?, ?, ?)
+                """, (ingredient.name, ingredient.ingredient_id, kroger_product_id))
+                conn.commit()
+            return True
+        except sqlite3.Error as e:
+            logger.error(f"Error linking ingredient {ingredient.name}: {e}")
+            return False
+        finally:
+            conn.close()
+
+    def process_recipe(self, recipe_id: int, verbose: bool = False) -> Dict:
+        """Process recipe and generate shopping list"""
+        try:
+            logger.info(f"Processing recipe {recipe_id}")
+            results = {
+                "recipe": None,
+                "shopping_list": [],
+                "total_cost": 0.0,
+                "processed_at": datetime.now().isoformat()
+            }
+            # Get recipe details
+            recipe = self.get_recipe_details(recipe_id)
+            if not recipe:
+                raise DatabaseError("Recipe not found")
+            results["recipe"] = recipe
+            # Get and process ingredients
+            ingredients = self.get_recipe_ingredients(recipe_id)
+            for ingredient in ingredients:
+                # Find matching product
+                product = self.find_kroger_product(ingredient)
+                if product:
+                    # Save product and create link
+                    product_id = self.save_kroger_product(product)
+                    self.link_ingredient_to_product(ingredient, product_id)
+                else:
+                    logger.warning(f"No product found for: {ingredient.name}")
+            # Generate shopping list
+            shopping_list = self.get_shopping_list(recipe_id)
+            results["shopping_list"] = [vars(item) for item in shopping_list]
+            results["total_cost"] = sum(item.price for item in shopping_list)
+            if verbose:
+                logger.info(f"Processed recipe: {recipe['name']}")
+                logger.info(f"Found {len(shopping_list)} items")
+                logger.info(f"Total cost: ${results['total_cost']:.2f}")
+            return results
+        except Exception as e:
+            logger.error(f"Error processing recipe {recipe_id}: {e}")
+            raise
+
+    def get_recipe_details_all(self) -> List[Dict]:
+        """Get all recipes from database"""
+        try:
+            conn = self._get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT recipe_id, name, category, cuisine_type, cooking_time, difficulty_level
+                FROM Recipe
+            """)
+            results = [dict(row) for row in cursor.fetchall()]
+            conn.close()
+            return results
+        except sqlite3.Error as e:
+            logger.error(f"Database error fetching recipes: {e}")
+            raise DatabaseError(f"Failed to fetch recipes: {str(e)}")
+
+    def get_recipe_details(self, recipe_id: int) -> Optional[Dict]:
+        """Get recipe details by ID"""
+        try:
+            conn = self._get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT recipe_id, name, category, cuisine_type, cooking_time, difficulty_level
+                FROM Recipe
+                WHERE recipe_id = ?
+            """, (recipe_id,))
+            result = cursor.fetchone()
+            conn.close()
+            return dict(result) if result else None
+        except sqlite3.Error as e:
+            logger.error(f"Database error fetching recipe {recipe_id}: {e}")
+            raise DatabaseError(f"Failed to fetch recipe: {str(e)}")
+
+    def get_recipe_ingredients(self, recipe_id: int) -> List[IngredientDetail]:
+        """Get ingredients for a recipe"""
+        try:
+            conn = self._get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT ingredient_id, name, quantity, measurement_unit, recipe_id
+                FROM Ingredient
+                WHERE recipe_id = ?
+            """, (recipe_id,))
+            results = cursor.fetchall()
+            conn.close()
+            return [
+                IngredientDetail(
+                    ingredient_id=row['ingredient_id'],
+                    name=row['name'],
+                    quantity=row['quantity'],
+                    measurement_unit=row['measurement_unit'],
+                    recipe_id=row['recipe_id']
+                )
+                for row in results
+            ]
+        except sqlite3.Error as e:
+            logger.error(f"Database error fetching ingredients for recipe {recipe_id}: {e}")
+            raise DatabaseError(f"Failed to fetch ingredients: {str(e)}")
+
+    def get_shopping_list(self, recipe_id: int) -> List[ShoppingListItem]:
+        """Get shopping list for a recipe"""
+        try:
+            conn = self._get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT
+                    i.name as ingredient_name,
+                    i.quantity,
+                    i.measurement_unit,
+                    kp.name as product_name,
+                    kp.brand,
+                    kp.price,
+                    kp.category
+                FROM Ingredient i
+                JOIN GroceryItem gi ON i.ingredient_id = gi.ingredient_id
+                JOIN KrogerProduct kp ON gi.kroger_product = kp.product_id
+                WHERE i.recipe_id = ?
+            """, (recipe_id,))
+            results = cursor.fetchall()
+            conn.close()
+            return [
+                ShoppingListItem(
+                    ingredient_name=row['ingredient_name'],
+                    quantity=row['quantity'],
+                    measurement_unit=row['measurement_unit'],
+                    product_name=row['product_name'],
+                    brand=row['brand'],
+                    price=row['price'],
+                    category=row['category']
+                )
+                for row in results
+            ]
+        except sqlite3.Error as e:
+            logger.error(f"Database error fetching shopping list for recipe {recipe_id}: {e}")
+            raise DatabaseError(f"Failed to fetch shopping list: {str(e)}")

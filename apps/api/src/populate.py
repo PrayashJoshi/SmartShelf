@@ -1,13 +1,9 @@
-from typing import List
-import requests
 import sqlite3
 import csv
-import os
-from dotenv import load_dotenv
-from enum import Enum
-import ast
 import logging
+import os
 from pipelines.nutrition_pipeline import NutritionPipeline
+from pipelines.kroger_pipeline import KrogerPipeline, IngredientDetail
 
 logger = logging.getLogger("")
 logging.basicConfig(format="%(levelname)s:\t  %(message)s", level=logging.DEBUG)
@@ -124,6 +120,7 @@ class Populate:
         logger.info("Attempting to Populate Nutrition Facts")
         self.populate_nutrition_facts()
         logger.info("Attempting to Populate Kroger Products")
+        self.populate_kroger()
         logger.info("Attempting to Populate Grocery Items")
 
     def populate_users(self):
@@ -283,105 +280,27 @@ class Populate:
         except sqlite3.DatabaseError as e:
             logger.debug(f"SQL STATEMENT IN User FAILED TO EXECUTE: {e}")
 
+    def populate_kroger(self):
+        client_id = os.getenv("KROGER_CLIENT_ID")
+        client_secret = os.getenv("KROGER_CLIENT_SECRET")
+        location_id = os.getenv("KROGER_LOCATION_ID", "70100465")
+        pipeline = KrogerPipeline(
+            client_id=client_id, 
+            client_secret=client_secret,
+            location_id=location_id
+        )
+        res = self.cursor.execute(
+                "SELECT * from Ingredient WHERE name ='Cheddar Cheese';"
+                )
+        ingredient = res.fetchone()
+        thing = IngredientDetail(ingredient["ingredient_id"],
+                                 ingredient["name"],
+                                 ingredient["quantity"],
+                                 ingredient["measurement_unit"],
+                                 ingredient["recipe_id"])
+        print(thing)
+        product = pipeline.find_kroger_product(thing)
+        print(product)
+
 # TODO: call prayash's kroger population script
 # search product
-
-
-def populate_food(cursor, conn):
-    with open("src/foodRecipes3.csv", newline="") as csvfile:
-        """
-        0 - title
-        2 - minutes
-        5 - tag
-        6 - nutrition
-        10 - ingredients
-
-        Labels:
-          Main-Dish (main-dish)
-          Side-Dish (side-dishes)
-          Desserts
-          Appetizers
-          Beverages
-          Etc
-        """
-        data = csv.reader(csvfile)
-        next(data)
-
-        row_id = 1
-        nutrition_id = 1
-        for row in data:
-            category = category_helper(row[5])
-            title = " ".join(row[0].split()).title()
-            logger.debug(f"Inserting New Recipe: {title}")
-            cursor.execute(
-                "INSERT INTO Recipe (recipe_id, name, category, cooking_time, url) VALUES (?, ?, ?, ?, ?)",  # noqa: E501
-                [
-                    row_id,
-                    title,
-                    category,
-                    row[2],
-                    "-".join(row[0].split()) + f"-{row[1]}",
-                ],
-            )
-            for ingredient in ast.literal_eval(row[10]):
-                res = requests.post(
-                    f"https://api.nal.usda.gov/fdc/v1/foods/search?api_key={os.getenv('NUTRITION_KEY')}",  # noqa: E501
-                    json={
-                        "query": f"{ingredient}",
-                        "dataType": ["Foundation"],
-                    },
-                )
-                nutrition_info = res.json()
-                title = ""
-
-                if len(nutrition_info["foods"]) > 0:
-                    # search raw ingredients
-                    food = nutrition_info["foods"][0]
-                    nutrients = food["foodNutrients"]
-                    info = nutrient_info_helper(nutrients)
-                    print(food["description"], ingredient)
-                    title = food["description"]
-                    logger.info(f"Insert {ingredient.title()}: {info}")
-                    cursor.execute(
-                        "INSERT INTO NutritionFact (name, guess, calories, fat, carbs, protein) VALUES (?,?, ?, ?, ?, ?)",  # noqa: E501
-                        [
-                            ingredient.title(),
-                            title,
-                            info["calories"],
-                            info["fat"],
-                            info["carbs"],
-                            info["protein"],
-                        ],
-                    )
-                else:
-                    res = requests.post(
-                        f"https://api.nal.usda.gov/fdc/v1/foods/search?api_key={os.getenv('NUTRITION_KEY')}",  # noqa: E501
-                        json={"query": f"{ingredient}"},
-                    )
-                    nutrition_info = res.json()
-                    food = nutrition_info["foods"][0]
-                    nutrients = food["foodNutrients"]
-                    info = nutrient_info_helper(nutrients)
-                    print(food["description"], ingredient)
-                    title = food["description"]
-                    logger.info(f"Insert {ingredient}: {info}")
-                    cursor.execute(
-                        "INSERT INTO NutritionFact (name, guess, calories, fat, carbs, protein) VALUES (?, ?, ?, ?, ?, ?)",  # noqa: E501
-                        [
-                            ingredient.title(),
-                            title,
-                            info["calories"],
-                            info["fat"],
-                            info["carbs"],
-                            info["protein"],
-                        ],
-                    )
-
-                cursor.execute(
-                    "INSERT INTO Ingredient (name, recipe_id, nutrition_id) VALUES (?, ?, ?)",  # noqa: E501
-                    [ingredient.title(), row_id, nutrition_id],
-                )
-                nutrition_id += 1
-            row_id += 1
-            conn.commit()
-        logger.debug("Food Related Tables Populated")

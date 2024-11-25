@@ -10,6 +10,7 @@ from datetime import datetime
 from populate import Populate
 import logging
 import shortuuid
+from dotenv import load_dotenv
 
 from routers import users, recipes, ingredients
 
@@ -39,6 +40,7 @@ app.add_middleware(
 
 @app.on_event("startup")
 def init_db():
+    load_dotenv()
     Populate()
 
 
