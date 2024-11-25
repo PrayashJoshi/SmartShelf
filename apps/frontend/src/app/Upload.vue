@@ -49,7 +49,7 @@ import { store } from "../store";
   function sumTotal() {
     let sum = 0
     for(let ingredient of ingredients.value){
-      sum += ingredient.price
+      sum += Number.parseFloat(ingredient.price)
     }
     return sum.toFixed(2);
   }

@@ -7,98 +7,133 @@ from dotenv import load_dotenv
 from enum import Enum
 import ast
 import logging
+from pipelines.nutrition_pipeline import NutritionPipeline
 
 logger = logging.getLogger("")
 logging.basicConfig(format="%(levelname)s:\t  %(message)s", level=logging.DEBUG)
 
 
-def category_helper(row: List[str]) -> str:
-    if row.find("main-dish") > 0:
-        return "Main"
-    elif row.find("side-dishes") > 0:
-        return "Side"
-    elif row.find("desserts") > 0:
-        return "Dessert"
-    elif row.find("appetizers") > 0:
-        return "Appetizer"
-    elif row.find("beverages") > 0:
-        return "Beverage"
-    else:
-        return "Etc"
+"""
+population order:
+    users => recipes => ingredients => nutritionfact & krogerproduct
+    => groceryitem
+
+on insert order:
+    groceryreceipt => shoppinglist => isowner
+
+"""
 
 
-def nutrient_info_helper(nutrients):
-    fact_info = {"calories": 0, "carbs": 0, "fat": 0, "protein": 0}
-    for nutrient in nutrients:
-        if nutrient["nutrientId"] == 1003:
-            fact_info["protein"] = nutrient["value"]
-        if nutrient["nutrientId"] == 1004:
-            fact_info["fat"] = nutrient["value"]
-        if nutrient["nutrientId"] == 1005:
-            fact_info["carbs"] = nutrient["value"]
-        if nutrient["nutrientId"] == 1008:
-            fact_info["calories"] = nutrient["value"]
+class Populate:
+    """Prepopulates the database with data"""
 
-    return fact_info
+    def __init__(self):
+        self.conn = sqlite3.connect("smartshelf.db")
+        self.conn.row_factory = sqlite3.Row
+        self.cursor = self.conn.cursor()
+        logger.info("Initializing Database")
+        self.generate_schemas()
+        logger.info("Beginning Population")
+        self.populate()
 
+    def __del__(self):
+        self.conn.close()
 
-def generate_schemas(cursor, conn):
-    cursor.executescript(
+    def generate_schemas(self):
+        self.cursor.executescript(
+            """
+            CREATE TABLE IF NOT EXISTS User (
+                user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                email TEXT UNIQUE,
+                password TEXT,
+                reg_date DATE
+            );
+            CREATE TABLE IF NOT EXISTS Recipe (
+                recipe_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                category TEXT,
+                cuisine_type TEXT,
+                cooking_time INTEGER,
+                difficulty_level TEXT
+            );
+            CREATE TABLE IF NOT EXISTS NutritionFact (
+                nutrition_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT UNIQUE,
+                guess TEXT,
+                calories REAL,
+                fat REAL,
+                carbs REAL,
+                protein REAL
+            );
+            CREATE TABLE IF NOT EXISTS KrogerProduct (
+                product_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                description TEXT,
+                price REAL,
+                brand TEXT,
+                category TEXT
+                );
+            CREATE TABLE IF NOT EXISTS Ingredient (
+                ingredient_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                quantity REAL,
+                measurement_unit TEXT,
+                recipe_id INTEGER,
+                FOREIGN KEY (recipe_id) REFERENCES Recipe(recipe_id)
+            );
+            CREATE TABLE IF NOT EXISTS GroceryItem (
+                item_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                nutrition_id INTEGER,
+                ingredient_id INTEGER,
+                kroger_product INTEGER,
+                FOREIGN KEY (nutrition_id) REFERENCES NutritionFact(nutrition_id),
+                FOREIGN KEY (kroger_product) REFERENCES KrogerProduct(product_id),
+                FOREIGN KEY (ingredient_id) REFERENCES Ingrediet(ingredient_id)
+            );
+            CREATE TABLE IF NOT EXISTS GroceryReceipt (
+                receipt_id TEXT,
+                name TEXT NOT NULL,
+                price FLOAT NOT NULL,
+                add_date DATE NOT NULL,
+                user_id INTEGER NOT NULL,
+                FOREIGN KEY (user_id) REFERENCES User(user_id)
+            );
+            CREATE TABLE IF NOT EXISTS ShoppingList (
+                list_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                created_date DATE,
+                status TEXT,
+                total_amount REAL
+            );
+          """
+        )
+        self.conn.commit()
+
+    def populate(self):
         """
-      CREATE TABLE IF NOT EXISTS User (
-          user_id INTEGER PRIMARY KEY AUTOINCREMENT,
-          name TEXT NOT NULL,
-          email TEXT UNIQUE,
-          password TEXT,
-          reg_date DATE
-      );
-      CREATE TABLE IF NOT EXISTS Recipe (
-          recipe_id INTEGER PRIMARY KEY AUTOINCREMENT,
-          name TEXT NOT NULL,
-          category TEXT,
-          cooking_time INTEGER,
-          url TEXT
-      );
-      CREATE TABLE IF NOT EXISTS NutritionFact (
-          nutrition_id INTEGER PRIMARY KEY AUTOINCREMENT,
-          name TEXT,
-          guess TEXT,
-          calories REAL,
-          fat REAL,
-          carbs REAL,
-          protein REAL
-      );
-      CREATE TABLE IF NOT EXISTS Ingredient (
-          ingredient_id INTEGER PRIMARY KEY AUTOINCREMENT,
-          name TEXT NOT NULL,
-          recipe_id INTEGER,
-          nutrition_id INTEGER,
-          FOREIGN KEY (recipe_id) REFERENCES Recipe(recipe_id),
-          FOREIGN KEY (nutrition_id) REFERENCES NutritionFact(nutrition_id)
-      );
-      CREATE TABLE IF NOT EXISTS GroceryItem (
-          grocery_id INTEGER PRIMARY KEY AUTOINCREMENT,
-          name TEXT NOT NULL
-      );
-      CREATE TABLE IF NOT EXISTS Receipt (
-          receipt_id TEXT,
-          name TEXT NOT NULL,
-          price FLOAT NOT NULL,
-          add_date DATE NOT NULL,
-          user_id INTEGER NOT NULL,
-          FOREIGN KEY (user_id) REFERENCES User(user_id)
-      );
-      """
-    )
-    conn.commit()
+        Populate Data To Database
+        Data found in foodRecipes.csv pulled from Food.com
+        """
+        logger.info("Attempting To Populate Users")
+        self.populate_users()
+        logger.info("Attempting to Populate Recipes")
+        self.populate_recipes()
+        logger.info("Attempting to Populate Ingredients")
+        self.populate_ingredients()
+        logger.info("Attempting to Populate Nutrition Facts")
+        self.populate_nutrition_facts()
+        logger.info("Attempting to Populate Kroger Products")
+        logger.info("Attempting to Populate Grocery Items")
 
-
-def populate_users(cursor, conn):
-    res = cursor.execute("SELECT COUNT(*) from User")
-    count = res.fetchone()
-    if count[0] == 0:
+    def populate_users(self):
+        res = self.cursor.execute("SELECT COUNT(*) as num from User")
+        count = res.fetchone()
+        if count["num"] > 0:
+            logger.info("Already populated")
+            return
         try:
-            cursor.executescript(
+            self.cursor.executescript(
                 """
               INSERT INTO User (name, email, password, reg_date) VALUES
                 ('Alice Johnson', 'alice.johnson@example.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '2024-05-14'),
@@ -131,13 +166,125 @@ def populate_users(cursor, conn):
                 ('Ben Hall', 'ben.hall@example.com', 'e325c62a4ecb5a22d21aee4d544fd71401e45ff8e641d70bc5ce6c23df38ee32', '2023-02-03'),
                 ('Chloe White', 'chloe.white@example.com', '9485f3e7988da1ed9264322d221e700a9633436114189ef227b309d2b26519ed', '2023-05-09'),
                 ('Daniel King', 'daniel.king@example.com', 'be88c1dbebf01c7186531f18350b3465dd394fb9168b81f66d6ed3c8e8815acd','2023-04-15'); 
-              """
+                """
             )
-            conn.commit()
+            self.conn.commit()
             logger.debug("User Table Population Complete")
-        except Exception as e:
-            print(e)
-            logger.debug("SQL STATEMENT IN User FAILED TO EXECUTE")
+        except sqlite3.DatabaseError as e:
+            logger.debug(f"SQL STATEMENT IN User FAILED TO EXECUTE: {e}")
+
+    def populate_recipes(self):
+        """
+        populates prepared data for recipes
+        """
+        res = self.cursor.execute("SELECT COUNT(*) as num from Recipe")
+        count = res.fetchone()
+        if count["num"] > 0:
+            logger.info("Already populated")
+            return
+        try:
+            self.cursor.execute(
+                """
+                INSERT INTO Recipe (name, category, cuisine_type, cooking_time,
+                                    difficulty_level) VALUES
+                ('Spaghetti Carbonara', 'Main Course', 'Italian', 20, 'Easy'),
+                ('Beef Stroganoff', 'Main Course', 'Russian', 30, 'Medium'),
+                ('Caesar Salad', 'Appetizer', 'American', 15, 'Easy'),
+                ('Pancakes', 'Breakfast', 'American', 20, 'Easy'),
+                ('Paella', 'Main Course', 'Spanish', 75, 'Hard'),
+                ('Ratatouille', 'Main Course', 'French', 50, 'Medium'),
+                ('Fish Tacos', 'Main Course', 'Mexican', 30, 'Easy'),
+                ('Pad Thai', 'Main Course', 'Thai', 30, 'Medium'),
+                ('Chocolate Cake', 'Dessert', 'French', 45, 'Medium'),
+                ('Mochi', 'Dessert', 'Japanese', 4, 'Easy'),
+                ('Sushi Rolls', 'Appetizer', 'Japanese', 15, 'Hard'),
+                ('Chocolate Chip Cookies', 'Dessert', 'American', 30, 'Easy'),
+                ('Falafel Wrap', 'Snack', 'Middle Eastern', 60, 'Easy'),
+                ('Ramen', 'Soup', 'Japanese', 50, 'Medium'),
+                ('Shepherd''s Pie', 'Main Dish', 'British', 70, 'Medium'),
+                ('Margherita Pizza', 'Main Dish', 'Italian', 80, 'Easy'),
+                ('Lasagna', 'Main Dish', 'Italian', 100, 'Medium'),
+                ('Chicken Satay', 'Appetizer', 'Indonesian', 35, 'Medium'),
+                ('Fried Rice', 'Side Dish', 'Chinese', 25, 'Easy'),
+                ('Lo Mein', 'Side Dish', 'Chinese', 20, 'Easy'),
+                ('Cheesecake', 'Dessert', 'American', 4235, 'Hard'),
+                ('Shakshuka', 'Breakfast', 'Middle Eastern', 30, 'Easy'),
+                ('Orange Chicken', 'Main Dish', 'American', 60, 'Medium'),
+                ('Egg Drop Soup', 'Soup', 'Chinese', 15, 'Easy'),
+                ('Broccoli Cheddar Soup', 'Soup', 'American', 35, 'Easy'),
+                ('Black Bean Burger', 'Main Dish', 'American', 12, 'Medium'),
+                ('Broccoli Frittata', 'Main Dish', 'American', 30, 'Easy'),
+                ('Coconut Curry', 'Main Dish', 'Thai', 30, 'Easy'),
+                ('Baklava', 'Dessert', 'Middle Eastern', 135, 'Hard'),
+                ('Chicken Noodle Soup', 'Soup', 'American', 40, 'Easy');
+                """
+            )
+            self.conn.commit()
+            logger.info("Recipe Table Populated")
+        except sqlite3.DatabaseError as e:
+            logger.debug(f"SQL STATEMENT IN User FAILED TO EXECUTE: {e}")
+
+    def populate_ingredients(self):
+        res = self.cursor.execute("SELECT COUNT(*) as num from Ingredient")
+        count = res.fetchone()
+        if count["num"] > 0:
+            logger.info("Already populated")
+            return
+        try:
+            with open("src/data/ingredients.csv", newline="") as csvfile:
+                data = csv.reader(csvfile)
+                next(data)
+                for row in data:
+                    self.cursor.execute(
+                        """
+                        INSERT INTO Ingredient (
+                            name, quantity, measurement_unit, recipe_id
+                        ) VALUES (?, ? ,?, ?);
+                        """,
+                        [row[1], row[2], row[3], row[4]],
+                    )
+            self.conn.commit()
+            logger.info("Ingredient Table Populated")
+        except sqlite3.DatabaseError as e:
+            logger.debug(f"SQL STATEMENT IN User FAILED TO EXECUTE: {e}")
+
+    def populate_nutrition_facts(self):
+        res = self.cursor.execute("SELECT COUNT(*) as num from NutritionFact")
+        count = res.fetchone()
+        if count["num"] > 0:
+            logger.info("Already populated")
+            return
+        try:
+            res = self.cursor.execute("SELECT COUNT(*) as num from Ingredient")
+            count = res.fetchone()
+            if count["num"] == 0:
+                raise Exception("Cannot find ingredient table")
+            res = self.cursor.execute("SELECT name from Ingredient")
+            pipeline = NutritionPipeline()
+            for ingredient in res.fetchall():
+                info = pipeline.call_api(ingredient["name"])
+                self.cursor.execute(
+                    """
+                    INSERT OR IGNORE INTO NutritionFact
+                    (name, guess, calories, fat, carbs, protein)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    """,
+                    [
+                        ingredient["name"],
+                        info.name,
+                        info.calories,
+                        info.fat,
+                        info.carbs,
+                        info.protein,
+                    ],
+                )
+                self.conn.commit()
+            logger.info("Recipe Table Populated")
+        except sqlite3.DatabaseError as e:
+            logger.debug(f"SQL STATEMENT IN User FAILED TO EXECUTE: {e}")
+
+# TODO: call prayash's kroger population script
+# search product
 
 
 def populate_food(cursor, conn):
@@ -238,28 +385,3 @@ def populate_food(cursor, conn):
             row_id += 1
             conn.commit()
         logger.debug("Food Related Tables Populated")
-
-
-def populate():
-    load_dotenv()
-
-    """
-    Populate Data To Database
-
-    Data found in foodRecipes.csv pulled from Food.com
-    """
-    logger.info("Initializing Database")
-    conn = sqlite3.connect("smartshelf.db")
-    cursor = conn.cursor()
-    generate_schemas(cursor, conn)
-    cursor.execute("DELETE FROM Recipe;")
-    cursor.execute("DELETE FROM NutritionFact;")
-    cursor.execute("DELETE FROM Ingredient;")
-
-    logger.info("Attempting To Populate User Table")
-    populate_users(cursor, conn)
-
-    logger.info("Attempting to Populate Recipe, Ingredient, and Nutrition Facts")
-    populate_food(cursor, conn)
-
-    conn.close()

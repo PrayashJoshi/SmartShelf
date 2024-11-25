@@ -2,6 +2,9 @@
 import { store } from "../store"
 import router from '../router';
 import RecipeComponent from "./RecipeComponent.vue"
+import { ref } from "vue"
+
+const awesome = ref(false)
 
 async function handleUploadClick() {
   console.log(store.loggedIn)
@@ -12,6 +15,12 @@ async function handleReceiptClick() {
   console.log(store.loggedIn)
   await router.push('/receipt') 
 }
+
+function toggle() {
+    test.value = !test.value
+    console.log("hi")
+}
+
 </script>
 
 

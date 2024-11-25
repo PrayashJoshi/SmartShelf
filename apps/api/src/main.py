@@ -7,16 +7,18 @@ from pydantic import BaseModel
 from typing import List
 import json
 from datetime import datetime
-from populate import populate
+from populate import Populate
 import logging
 import shortuuid
-from Levenshtein import distance 
+
+from routers import users, recipes, ingredients
 
 logger = logging.getLogger('')
 logging.basicConfig(format='%(levelname)s:\t  %(message)s',
                     level=logging.DEBUG)
 
 app = FastAPI()
+app.include_router(router=users.router)
 
 origins = [
     "http://localhost",
@@ -31,12 +33,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # Function to initialize the SQLite database and create tables
 
 
-# @app.on_event("startup")
-# def init_db():
-#     populate()
+@app.on_event("startup")
+def init_db():
+    Populate()
 
 
 @app.get('/recipes/')
@@ -89,102 +92,6 @@ def get_ingredients(recipe_name: str):
     conn.close()
     return result
 
-
-'''
-HTTPS requests pertaining to Users
-'''
-
-
-@app.get('/users/monthly_signups')
-def get_users():
-    conn = sqlite3.connect("smartshelf.db")
-    cursor = conn.cursor()
-
-    res = cursor.execute('''
-                         SELECT strftime('%m, %Y', reg_date) AS signup_date,
-                         strftime('%Y', reg_date) AS year, Count(*) as signups
-                         FROM User GROUP BY signup_date ORDER BY year;
-                         ''')
-
-    column_names = [description[0] for description in cursor.description]
-    result = [dict(zip(column_names, row)) for row in res.fetchall()]
-    conn.close()
-    return result
-
-
-class User(BaseModel):
-    name: str
-    email: str
-    password: str
-    date: str = datetime.now().strftime('%Y-%m-%d')
-
-
-@app.post('/users/add_user/')
-def add_user(user: User) -> str | dict:
-    logger.info(f'Adding new user {user.name}')
-    try:
-        conn = sqlite3.connect("smartshelf.db")
-        cursor = conn.cursor()
-
-        cursor.execute(f'''
-                        INSERT INTO User (name, email, password, reg_date)
-                        VALUES (
-                            '{user.name}',
-                            '{user.email}',
-                            '{user.password}',
-                            '{user.date}'
-                        );
-                        ''')
-        conn.commit()
-        conn.close()
-    except Exception as e:
-        logger.error(f'Cannot add new user {e}')
-        raise e
-    return 'ok'
-
-
-@app.get('/users/verify')
-def verify_user(email: str, password: str):
-    logger.info(f'Verifying email {email}')
-    try:
-        conn = sqlite3.connect("smartshelf.db")
-        cursor = conn.cursor()
-
-        res = cursor.execute(f'''
-                             SELECT user_id, name, email from User
-                             WHERE email = '{email}'
-                             AND password= '{password}';
-                             ''')
-        user = res.fetchone()
-        if user is None:
-            raise HTTPException(status_code=404, detail="User Not Found")
-        column_names = [description[0] for description in cursor.description]
-        result = dict(zip(column_names, user))
-        conn.close()
-        return result
-    except Exception as e:
-        logger.error(f'Cannot verify user {e}')
-        raise e
-
-
-@app.put('/users/update')
-def update_user(id: int, user: User):
-    logger.info(f'Updating information for User {id}')
-    try:
-        conn = sqlite3.connect("smartshelf.db")
-        cursor = conn.cursor()
-        cursor.execute(f'''
-                       UPDATE User
-                       SET name='{user.name}', email='{user.email}',
-                       password = '{user.password}'
-                       WHERE user_id = '{id}';
-                       ''')
-        conn.commit()
-        conn.close()
-        return 'ok'
-    except Exception as e:
-        logger.error(f'Cannot verify user {e}')
-        raise e
 
 
 @app.post('/check_kroger')
