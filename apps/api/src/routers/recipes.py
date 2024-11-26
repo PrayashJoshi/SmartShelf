@@ -1,6 +1,6 @@
 # src/routes/recipe_routes.py
 from fastapi import APIRouter, HTTPException, Depends
-from typing import List, Optional
+from typing import List, Optional, Dict
 from pydantic import BaseModel
 import logging
 from pipelines.ingredient_pipeline import IngredientPipeline
@@ -78,6 +78,18 @@ async def get_recipe(recipe_id: int):
     except Exception as e:
         logger.error(f"Error fetching recipe {recipe_id}: {str(e)}")
         raise HTTPException(status_code=500, detail="Error fetching recipe")
+
+
+@router.get("/recommended/{user_id}", response_model=List[Dict])
+async def get_recommended_recipes(user_id: int):
+    """Get recommended recipes"""
+    try:
+        print(type(user_id))
+        pipeline = get_ingredient_pipeline()
+        return pipeline.get_recipe_details_recommended(user_id)
+    except Exception as e:
+        logger.error(f"Error fetching recipes: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error fetching recipes")
 
 
 @router.get("/{recipe_id}/ingredients", response_model=List[Ingredient])

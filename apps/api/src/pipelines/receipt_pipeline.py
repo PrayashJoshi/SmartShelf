@@ -60,7 +60,7 @@ class ReceiptPipeline:
                 print(item)
                 cursor.execute(
                     """
-                    INSERT INTO Receipt(
+                    INSERT INTO GroceryReceipt(
                         receipt_id,
                         name,
                         price,
@@ -73,7 +73,7 @@ class ReceiptPipeline:
 
             conn.commit()
             conn.close()
-            return "ok"
+            return id
         except Exception as e:
             print(e)
             return e
@@ -87,11 +87,11 @@ class ReceiptPipeline:
                 """
                     SELECT receipt_id, add_date, COUNT(*) as items,
                     SUM(price) as total
-                    FROM Receipt
-                    WHERE Receipt.user_id == ?
+                    FROM GroceryReceipt
+                    WHERE user_id == ?
                     GROUP BY receipt_id
                     ORDER BY add_date DESC;
-                    """[
+                    """, [
                     user_id
                 ]
             )
@@ -110,15 +110,15 @@ class ReceiptPipeline:
             cursor = conn.cursor()
             res = cursor.execute(
                 """
-                    SELECT SUM(price) as total,
-                    strftime('%m', add_date) AS month,
-                    strftime('%Y', add_date) AS year
-                    FROM Receipt
-                    WHERE Receipt.user_id == ?
-                    AND year == ?
-                    GROUP BY month
-                    """,
-                [user_id, year],
+                SELECT SUM(price) as total,
+                strftime('%m', add_date) AS month,
+                strftime('%Y', add_date) AS year
+                FROM GroceryReceipt gr
+                WHERE gr.user_id == ?
+                AND year = ?
+                GROUP BY month
+                """,
+                [user_id, str(year)],
             )
 
             column_names = [description[0] for description in cursor.description]
@@ -136,7 +136,7 @@ class ReceiptPipeline:
             res = cursor.execute(
                 """
                     SELECT name, price
-                    FROM Receipt
+                    FROM GroceryReceipt
                     WHERE user_id == ?
                     AND receipt_id == ?;
                     """,

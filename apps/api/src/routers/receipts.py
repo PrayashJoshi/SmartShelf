@@ -35,7 +35,7 @@ async def add_receipt(receipt: Receipt):
 async def get_receipt_history(user_id: int):
     try:
         pipeline = ReceiptPipeline()
-        return pipeline.get_reciept_history(user_id)
+        return pipeline.get_receipt_history(user_id)
     except Exception as e:
         logger.error(f"Error calling method {e}")
 

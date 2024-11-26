@@ -13,6 +13,7 @@ let handleLogin = async (e: Event) => {
 
     if (email.value === "admin@ohyeah.com") {
       store.loggedIn = true
+      store.admin = true
       await router.push('/admin/dash')
     }
   }

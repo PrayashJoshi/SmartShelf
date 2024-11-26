@@ -47,11 +47,21 @@ function toggle() {
       </div>
     </button>
 
-    <div class="mt-4 lg:flex w-full lg:items-center lg:justify-between">
-      <h2 class="text-xl font-bold leading-7 text-gray-900 sm:truncate sm:text-2xl sm:tracking-tight">
-        Recipes For You
-      </h2>
-    </div>
+    <button @click=handleUploadClick class="w-full max-h-32 bg-sky-500 px-4
+        grid place-content-center grid-cols-2 mt-8 mb-8 rounded-md group
+        hover:scale-105 hover:shadow-md">
+      <div class="flex flex-col align-middle justify-center">
+        <h2 class="text-white sm:text-xl text-left font-bold">
+          View Shopping List
+        </h2>
+        <p class="text-xs text-white text-left font-thin sm:text-sm">
+          See what you need to buy from Kroger! 
+        </p>
+      </div>
+      <div class="flex pb-8 h-48 align-center justify-center">
+        <image class="group-hover:scale-110" src="/assets/shoplist.png"/>
+      </div>
+    </button>
 
     <RecipeComponent/>
 
@@ -66,7 +76,7 @@ function toggle() {
           Your Receipt History
         </h2>
         <p class="text-xs text-white text-left font-thin sm:text-sm">
-          View your receipts to learn about trends
+          View trends, and generate shopping lists from previous receipts
         </p>
       </div>
     </button>

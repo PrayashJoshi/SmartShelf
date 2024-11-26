@@ -93,6 +93,8 @@ class KrogerAPI:
         """Get access token using client credentials flow"""
         url = f"{self.base_url}/connect/oauth2/token"
         print(self._get_auth_header())
+        print(self.client_id)
+        print(self.client_secret)
         headers = {
             **self._get_auth_header(),
             "Content-Type": "application/x-www-form-urlencoded",

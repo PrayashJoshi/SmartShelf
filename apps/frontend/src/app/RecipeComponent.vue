@@ -1,5 +1,6 @@
 <script setup>
   import { shallowRef, onMounted, ref } from 'vue';
+  import { store } from "../store"
 
   const recipes = shallowRef([])
   const ingredients = shallowRef([])
@@ -8,9 +9,20 @@
   const imgSrc = ref('')
   
   async function getData() {
+    console.log(store.user.user_id)
     recipes.value = await (
-      await fetch('http://127.0.0.1:8000/api/v1/recipes/random')
+      await
+      fetch(`http://127.0.0.1:8000/api/v1/recipes/recommended/${store.user.user_id}`)
       ).json()
+    console.log(recipes.value)
+  }
+
+  async function showAll() {
+    recipes.value = await (
+      await
+      fetch(`http://127.0.0.1:8000/api/v1/recipes/`)
+      ).json()
+
     console.log(recipes.value)
   }
 
@@ -18,29 +30,47 @@
     modalRecipe.value = recipe
     console.log(modalRecipe.value)
     const ingredientData = await (
-      await fetch(`http://127.0.0.1:8000/api/v1/recipes/ingredients/${recipe.recipe_id}`)
+      await fetch(`http://127.0.0.1:8000/api/v1/recipes/${recipe.recipe_id}/ingredients`)
     ).json()
-
-    const imgData = await (
-      await fetch(`https://api.dub.co/metatags?url=https://www.food.com/recipe/${recipe.url}`)
-    ).json()
-
-    console.log(ingredientData)
-    console.log(imgData)
     ingredients.value = ingredientData
-    if (imgData.image ===
-        "https://geniuskitchen.sndimg.com/fdc-new/img/fdc-shareGraphic.png"){
-      imgSrc.value = ''
-    }
-    else{
-      imgSrc.value = imgData.image
-    }
 
     toggle()
   }
 
   function toggle() {
     displayModal.value = !displayModal.value  
+  }
+
+
+  function generateEmoji(cuisine){
+    switch(cuisine) {
+      case 'Italian':
+        return '🇮🇹'
+      case 'Russian':
+        return '🇷🇺'
+      case 'American':
+        return '🇺🇸'
+      case 'Spanish':
+        return '🇪🇸'
+      case 'French':
+        return '🇫🇷'
+      case 'Mexican':
+        return '🇲🇽'
+      case 'Thai':
+        return '🇹🇭'
+      case 'Japanese':
+        return '🇯🇵'
+      case 'Middle Eastern':
+        return '🧆'
+      case 'British':
+        return '🇬🇧'
+      case 'Indonesian':
+        return '🇮🇩'
+      case 'Chinese':
+        return '🇨🇳'
+
+    }
+
   }
 
   onMounted(async ()=> {
@@ -51,6 +81,12 @@
 
 <template>
 
+  <div class="mt-4 lg:flex w-full lg:items-center lg:justify-between">
+    <h2 class="text-xl font-bold leading-7 text-gray-900 sm:truncate sm:text-2xl sm:tracking-tight">
+      Recipes For You
+    </h2>
+    <button @click="showAll">show all</button>
+  </div>
   <div class="mt-4 flex gap-1 overflow-x-scroll max-w-full">
     <div 
       v-for="recipe in recipes"
@@ -62,7 +98,9 @@
     >
       <h2 class="font-bold text-center">{{ recipe.name }}</h2>
       <h3 class="italic">{{ recipe.category }}</h3>
+      <h3 class="italic">{{ recipe.difficulty_level }}</h3>
       <h3>{{ recipe.cooking_time }} minutes</h3>
+      <p>{{generateEmoji(recipe.cuisine_type)}}</p>
     </div>
   </div>
 
@@ -89,11 +127,11 @@
             <!-- Modal body -->
             <div class="p-4 md:p-5 space-y-4">
                 <img class="align-center max-w-64" :src="imgSrc"/>
-                <a class="text-sky-500 underline" target="_blank" rel="noopener noreferrer" :href="'https://www.food.com/recipe/'+modalRecipe?.url"> Actual Recipe Here </a>
                 <ul v-for="(ingredient, i) in ingredients"
                     :key="ingredient.name+i">
                   <li class="grid grid-cols-3">
-                      <span>{{ingredient.name}}</span>
+                      <span class="span-cols-2">{{ingredient.name}}</span>
+                      <span>{{ingredient.quantity}} {{ingredient.measurement_unit}}</span>
                   </li>
                 </ul>
                 <button class="w-full lg:inline mt-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-white">

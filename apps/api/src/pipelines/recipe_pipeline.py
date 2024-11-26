@@ -31,7 +31,7 @@ class ShoppingListItem:
 
 
 class IngredientPipeline:
-    """Recipes + Ingredients"""
+    """Recipes, Ingredients, and Kroger"""
 
     def __init__(
         self,
@@ -180,47 +180,13 @@ class IngredientPipeline:
         try:
             conn = self._get_db_connection()
             cursor = conn.cursor()
-            res = cursor.execute(
+            cursor.execute(
                 """
-                SELECT * FROM Recipe;
+                SELECT recipe_id, name, category, cuisine_type, cooking_time, difficulty_level
+                FROM Recipe
                 """
             )
-            results = [dict(row) for row in res.fetchall()]
-            conn.close()
-            return results
-        except sqlite3.Error as e:
-            logger.error(f"Database error fetching recipes: {e}")
-            raise DatabaseError(f"Failed to fetch recipes: {str(e)}")
-
-    def get_recipe_details_recommended(self, user_id: int) -> List[Dict]:
-        """Get all recipes from database"""
-        try:
-            conn = self._get_db_connection()
-            cursor = conn.cursor()
-
-            res = cursor.execute(
-                """
-                SELECT * FROM Recipe
-                WHERE NOT EXISTS (SELECT 1 FROM GroceryReceipt WHERE user_id = ?)
-                ORDER BY RANDOM() LIMIT 5
-                """, [user_id]
-            )
-
-            count = res.fetchone()
-
-            if (count is None):
-                res = cursor.execute(
-                    """
-                    SELECT r.*, gr.name as grocery_item FROM Recipe r
-                    JOIN Ingredient i ON r.recipe_id = i.recipe_id
-                    JOIN (SELECT * FROM GroceryReceipt ORDER BY add_date DESC) gr ON i.name LIKE gr.name
-                    WHERE gr.user_id = ?
-                    LIMIT 5
-                    """,
-                    [user_id]
-                )
-
-            results = [dict(row) for row in res.fetchall()]
+            results = [dict(row) for row in cursor.fetchall()]
             conn.close()
             return results
         except sqlite3.Error as e:

@@ -29,7 +29,7 @@ class TestRunner:
         self.success = load_dotenv()
         self.client_id = os.getenv("KROGER_CLIENT_ID")
         self.client_secret = os.getenv("KROGER_CLIENT_SECRET")
-        self.location_id = os.getenv("KROGER_LOCATION_ID", "70100465")
+        self.location_id = os.getenv("KROGER_LOCATION_ID", "02900210")
         self.api: Optional[KrogerAPI] = None
         self.pipeline: Optional[KrogerPipeline] = None
 
