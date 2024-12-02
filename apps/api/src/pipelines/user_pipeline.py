@@ -56,6 +56,27 @@ class UserPipeline:
             cursor.commit()
             conn.close()
 
+    def op_user(self, new_admin_email: str):
+        """ Add new admin """
+        conn = self._get_db_connection()
+        cursor = conn.cursor()
+        try:
+            cursor.execute(
+                """
+                UPDATE User
+                SET admin = 1
+                WHERE email = ?;
+                """,
+                [new_admin_email],
+            )
+            conn.commit()
+            return "ok"
+        except Exception as e:
+            logger.error(f"Cannot verify user {e}")
+            raise e
+        finally:
+            conn.close()
+
     def verify_credentials(self, email: str, password: str):
         """Verify the user credentials on login and password changes"""
         conn = self._get_db_connection()

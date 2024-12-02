@@ -44,6 +44,15 @@ def get_minmax():
         raise HTTPException(status_code=500, detail="Error fetching monthly signups")
 
 
+@router.post("/op_user/")
+def op_user(email: str) -> str | dict:
+    try:
+        pipeline = UserPipeline()
+        return pipeline.op_user(email)
+    except Exception as e:
+        logger.error(e)
+        raise HTTPException(status_code=500, detail="Error could not op user")
+
 
 @router.post("/add_user/")
 def add_user(user: User) -> str | dict:

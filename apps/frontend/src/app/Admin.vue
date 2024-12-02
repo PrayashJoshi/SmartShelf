@@ -23,6 +23,7 @@ ChartJS.register(
 let rendered = ref(false)
 let userPrivs = ref(false)
 let recipeControl = ref(false)
+let email = ref('')
 let userSignupData: any;
 let recipeData: any;
 let stats: any
@@ -76,6 +77,23 @@ async function getData() {
 
 }
 
+async function handleOp() {
+  try {
+    const res = await
+    fetch(`http://localhost:8000/api/v1/users/op_user/?email=${email.value}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    })
+
+    if (res.ok) {
+      console.log('pushed')
+    }
+  }
+  catch(e){
+    console.log(e)
+  }
+}
+
 
 onMounted(async () => {
   await getData()
@@ -115,7 +133,7 @@ onMounted(async () => {
     <h2 class="text-xl font-bold leading-7 text-gray-900 sm:truncate sm:text-2xl sm:tracking-tight">
        Add Admin
     </h2>
-    <form class="space-y-6" @submit.prevent="handleLogin">
+    <form class="space-y-6" @submit.prevent="handleOp">
       <div>
         <label for="email" class="block text-sm font-medium leading-6 text-gray-900">Email address</label>
         <div class="mt-2">
