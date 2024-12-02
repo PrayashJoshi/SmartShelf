@@ -98,10 +98,12 @@ class Populate:
                 FOREIGN KEY (user_id) REFERENCES User(user_id)
             );
             CREATE TABLE IF NOT EXISTS ShoppingList (
-                list_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                list_id TEXT,
+                user_id INTEGER,
+                grocery_id INTEGER,
                 created_date DATE,
-                status TEXT,
-                total_amount REAL
+                FOREIGN KEY (user_id) REFERENCES User(user_id),
+                FOREIGN KEY (grocery_id) REFERENCES GroceryItem(item_id)
             );
           """
         )

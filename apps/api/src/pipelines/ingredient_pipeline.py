@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from pipelines.kroger_api_utils import KrogerAPI, KrogerProduct, KrogerAPIError
 from errors import DatabaseError
+import shortuuid
 
 logger = logging.getLogger(__name__)
 
@@ -144,10 +145,12 @@ class IngredientPipeline:
                 # Create new link
                 cursor.execute(
                     """
-                    INSERT INTO GroceryItem (name, ingredient_id, kroger_product)
-                    VALUES (?, ?, ?)
+                    INSERT INTO GroceryItem (name, nutrition_id, ingredient_id, kroger_product)
+                    SELECT ?, nf.nutrition_id, ?, ? FROM NutritionFact nf
+                    WHERE nf.name = ?
                     """,
-                    (ingredient.name, ingredient.ingredient_id, kroger_product_id),
+                    (ingredient.name, ingredient.ingredient_id,
+                     kroger_product_id, ingredient.name),
                 )
                 conn.commit()
             return True
@@ -202,7 +205,7 @@ class IngredientPipeline:
             cursor = conn.cursor()
             res = cursor.execute(
                 """
-                SELECT * FROM Ingredient;
+                SELECT 1 FROM Ingredient;
                 """
             )
             results = [dict(row) for row in res.fetchall()]
@@ -342,6 +345,49 @@ class IngredientPipeline:
             )
             raise DatabaseError(f"Failed to fetch ingredients: {str(e)}")
 
+    def get_shopping_list_user(self, user_id: int):
+        """Get shopping list for a recipe with user"""
+        try:
+            conn = self._get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                SELECT
+                    i.name as ingredient_name,
+                    i.quantity,
+                    i.measurement_unit,
+                    kp.name as product_name,
+                    kp.brand,
+                    kp.price,
+                    kp.category
+                FROM ShoppingList li
+                JOIN GroceryItem gi ON li.grocery_id = gi.item_id
+                JOIN Ingredient i ON i.ingredient_id = gi.ingredient_id
+                JOIN KrogerProduct kp ON kp.product_id = gi.kroger_product
+                WHERE li.user_id = ?;
+                """,
+                [user_id],
+            )
+            results = cursor.fetchall()
+            conn.close()
+            return [
+                ShoppingListItem(
+                    ingredient_name=row["ingredient_name"],
+                    quantity=row["quantity"],
+                    measurement_unit=row["measurement_unit"],
+                    product_name=row["product_name"],
+                    brand=row["brand"],
+                    price=row["price"],
+                    category=row["category"],
+                )
+                for row in results
+            ]
+        except sqlite3.Error as e:
+            logger.error(
+                f"Database error fetching shopping list for user {user_id}: {e}"
+            )
+            raise DatabaseError(f"Failed to fetch shopping list: {str(e)}")
+
     def get_shopping_list(self, recipe_id: int) -> List[ShoppingListItem]:
         """Get shopping list for a recipe"""
         try:
@@ -431,4 +477,46 @@ class IngredientPipeline:
             logger.info(f"Added {ingredient.name}")
         except sqlite3.Error as e:
             logger.error(f"Database error adding recipe {ingredient.name}: {e}")
+            raise DatabaseError(f"Failed to fetch recipe: {str(e)}")
+
+    def add_shopping_list(self, recipe_id: int, user_id: int):
+        """Add grocery items list to database"""
+        try:
+            conn = self._get_db_connection()
+            cursor = conn.cursor()
+            id = shortuuid.ShortUUID().random(length=32)
+            cursor.execute(
+                """
+                INSERT INTO ShoppingList (list_id, user_id, grocery_id, created_date)
+                SELECT ?, ?, gi.ingredient_id, date('now') FROM GroceryItem gi
+                JOIN Ingredient i ON gi.ingredient_id = i.ingredient_id
+                WHERE i.recipe_id = ?;
+                """,
+                [id, user_id, recipe_id]
+            )
+            conn.commit()
+            conn.close()
+            list_id = cursor.lastrowid
+            return list_id
+        except sqlite3.Error as e:
+            logger.error(f"Database error adding to list {user_id}: {e}")
+            raise DatabaseError(f"Failed to fetch recipe: {str(e)}")
+
+    def delete_shopping_list(self, user_id: int):
+        """Delete grocery items"""
+        try:
+            conn = self._get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                DELETE FROM ShoppingList WHERE user_id = ?
+                """,
+                [user_id]
+            )
+            conn.commit()
+            conn.close()
+            list_id = cursor.lastrowid
+            return list_id
+        except sqlite3.Error as e:
+            logger.error(f"Database error deleting to list {user_id}: {e}")
             raise DatabaseError(f"Failed to fetch recipe: {str(e)}")

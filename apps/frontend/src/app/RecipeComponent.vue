@@ -18,6 +18,22 @@
     console.log(recipes.value)
   }
 
+  async function generateList(user_id, recipe_id) {
+    console.log(user_id, recipe_id)
+    const res = await fetch('http://localhost:8000/api/v1/recipes/add_list', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        "user_id": user_id,
+        "recipe_id": recipe_id,
+      }),
+    })
+
+    if (res.ok) {
+      console.log('Added')
+    }
+  }
+
   async function showAll() {
     recipes.value = await (
       await
@@ -157,7 +173,9 @@
                       </div>
                   </li>
                 </ul>
-                <button class="w-full lg:inline mt-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-white">
+                <button
+                    @click="generateList(store.user.user_id, modalRecipe?.recipe_id)"
+                    class="w-full lg:inline mt-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-white">
                     Generate Shopping List
                 </button>
 

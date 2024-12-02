@@ -1,6 +1,6 @@
 # src/routes/recipe_routes.py
 from fastapi import APIRouter, HTTPException, Depends
-from typing import List, Optional
+from typing import List, Optional, Dict
 from pydantic import BaseModel
 import logging
 from pipelines.ingredient_pipeline import IngredientPipeline
@@ -41,6 +41,11 @@ class ShoppingListItem(BaseModel):
     price: float
     category: str
     store_location: Optional[str]
+
+
+class IdLookUps(BaseModel):
+    user_id: int
+    recipe_id: int
 
 
 # Dependency for IngredientPipeline
@@ -119,17 +124,44 @@ async def get_shopping_list(recipe_id: int):
         raise HTTPException(status_code=500, detail="Error generating shopping list")
 
 
-@router.get("/cuisine/{cuisine_type}", response_model=List[Recipe])
-async def get_recipes_by_cuisine(cuisine_type: str):
+@router.get("/{user_id}/shopping-list-user", response_model=List[ShoppingListItem])
+async def get_shopping_list_user(user_id: int):
+    """Get shopping list for a specific recipe"""
+    try:
+        pipeline = get_ingredient_pipeline()
+        shopping_list = pipeline.get_shopping_list_user(user_id)
+        return [vars(item) for item in shopping_list]
+    except Exception as e:
+        logger.error(f"Error generating shopping list for {user_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error generating shopping list")
+
+
+@router.get("/cuisines/", response_model=List[Dict])
+async def get_recipes_by_cuisine():
     """Get recipes filtered by cuisine type"""
     try:
         pipeline = get_ingredient_pipeline()
-        recipes = [
-            recipe
-            for recipe in pipeline.get_recipe_details_all()
-            if recipe["cuisine_type"].lower() == cuisine_type.lower()
-        ]
-        return recipes
+        return pipeline.get_recipe_cuisines()
     except Exception as e:
-        logger.error(f"Error fetching recipes for cuisine {cuisine_type}: {str(e)}")
+        logger.error(f"Error fetching recipes for cuisines: {str(e)}")
         raise HTTPException(status_code=500, detail="Error fetching recipes by cuisine")
+
+
+@router.post("/add_list")
+async def add_recipe_to_list(body: IdLookUps):
+    try:
+        pipeline = get_ingredient_pipeline()
+        return pipeline.add_shopping_list(user_id=body.user_id, recipe_id=body.recipe_id)
+    except Exception as e:
+        logger.error(f"Error adding to ShoppingList: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error adding to ShoppingList")
+
+
+@router.delete("/clear_list")
+async def clear_list(body: IdLookUps):
+    try:
+        pipeline = get_ingredient_pipeline()
+        return pipeline.delete_shopping_list(body.user_id)
+    except Exception as e:
+        logger.error(f"Error adding to ShoppingList: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error deleting to ShoppingList")

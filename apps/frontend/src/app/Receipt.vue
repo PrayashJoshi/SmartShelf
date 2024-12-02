@@ -133,12 +133,6 @@ onMounted(()=> {
           </h2>
           <Line v-if="rendered" :data="data" />
         </div>
-        <div>
-          <h2 class="text-xs sm:text-lg font-bold leading-7 text-gray-900 sm:truncate sm:tracking-tight">
-            Frequent Ingredients in {{ new Date().getFullYear() }}
-          </h2>
-          <Line v-if="rendered" :data="data" />
-        </div>
       </div>
 
       <div id="default-modal" tab="-1" v-show="displayModal" class="overflow-y-auto
@@ -169,10 +163,6 @@ onMounted(()=> {
                           <span class="span-cols-2">{{item.name}} {{item.price}}</span>
                       </li>
                     </ul>
-                    <button class="w-full lg:inline mt-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-white">
-                        Generate Shopping List
-                    </button>
-
                 </div>
             </div>
         </div>

@@ -80,8 +80,6 @@ async function getData() {
 onMounted(async () => {
   await getData()
 })
-
-
 </script>
 
 
