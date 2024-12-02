@@ -29,6 +29,7 @@ let handleLogin = async () => {
       store.user = data
       console.log(hashedPass)
       console.log(data)
+      console.log(data.admin)
 
       await router.push('/')
     }

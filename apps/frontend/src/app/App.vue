@@ -14,7 +14,7 @@ function logout(){
       <!-- TODO: adjust to make user custom link -->
       <RouterLink to="/">Home</RouterLink>
       <RouterLink to="/profile">Profile</RouterLink>
-      <RouterLink v-if="store.admin" to="/admin/dash">Dashboard</RouterLink>
+      <RouterLink v-if="store.user.admin" to="/admin/dash">Dashboard</RouterLink>
       <RouterLink to="/login" @click="logout">Logout</RouterLink>
     </nav>
   </header>
@@ -24,7 +24,7 @@ function logout(){
       <!-- TODO: adjust to make user custom link -->
       <RouterLink to="/">Home</RouterLink>
       <RouterLink to="/profile">Profile</RouterLink>
-      <RouterLink v-if="store.admin" to="/admin/dash">Dashboard</RouterLink>
+      <RouterLink v-if="store.user.admin" to="/admin/dash">Dashboard</RouterLink>
       <RouterLink to="/login">Logout</RouterLink>
     </div>
   </nav>

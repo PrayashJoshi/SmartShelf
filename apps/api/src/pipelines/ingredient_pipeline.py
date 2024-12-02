@@ -16,6 +16,27 @@ class IngredientDetail:
     quantity: float
     measurement_unit: str
     recipe_id: int
+    calories: int
+    protein: int
+    fat: int
+    carbs: int
+
+
+@dataclass
+class IngredientPartial:
+    name: str
+    quantity: float
+    measurement_unit: str
+
+
+@dataclass
+class RecipeDetail:
+    name: str
+    category: float
+    cuisine_type: str
+    cooking_time: int
+    difficulty_level: int
+    ingredients: List[IngredientPartial]
 
 
 @dataclass
@@ -175,6 +196,24 @@ class IngredientPipeline:
             logger.error(f"Error processing recipe {recipe_id}: {e}")
             raise
 
+    def check_populated(self):
+        try:
+            conn = self._get_db_connection()
+            cursor = conn.cursor()
+            res = cursor.execute(
+                """
+                SELECT * FROM Ingredient;
+                """
+            )
+            results = [dict(row) for row in res.fetchall()]
+            conn.close()
+            return results
+        except sqlite3.Error as e:
+            logger.error(f"Database error fetching recipes: {e}")
+            raise DatabaseError(f"Failed to fetch recipes: {str(e)}")
+
+        pass
+
     def get_recipe_details_all(self) -> List[Dict]:
         """Get all recipes from database"""
         try:
@@ -186,6 +225,25 @@ class IngredientPipeline:
                 """
             )
             results = [dict(row) for row in res.fetchall()]
+            conn.close()
+            return results
+        except sqlite3.Error as e:
+            logger.error(f"Database error fetching recipes: {e}")
+            raise DatabaseError(f"Failed to fetch recipes: {str(e)}")
+
+    def get_recipe_cuisines(self) -> List[Dict]:
+        try:
+            conn = self._get_db_connection()
+            cursor = conn.cursor()
+            res = cursor.execute(
+                """
+                SELECT cuisine_type, Count(*) as count
+                FROM Recipe
+                GROUP BY cuisine_type;
+                """
+            )
+            results = [dict(row) for row in res.fetchall()]
+            print(results)
             conn.close()
             return results
         except sqlite3.Error as e:
@@ -238,7 +296,7 @@ class IngredientPipeline:
                 FROM Recipe
                 WHERE recipe_id = ?
                 """,
-                (recipe_id,),
+                (recipe_id),
             )
             result = cursor.fetchone()
             conn.close()
@@ -254,9 +312,11 @@ class IngredientPipeline:
             cursor = conn.cursor()
             cursor.execute(
                 """
-                SELECT ingredient_id, name, quantity, measurement_unit, recipe_id
-                FROM Ingredient
-                WHERE recipe_id = ?
+                SELECT i.*, nf.calories, nf.fat, nf.protein, nf.carbs
+                FROM Ingredient i
+                JOIN GroceryItem g ON g.ingredient_id = i.ingredient_id
+                JOIN NutritionFact nf ON nf.nutrition_id = g.nutrition_id
+                WHERE i.recipe_id = ?;
                 """,
                 (recipe_id,),
             )
@@ -269,6 +329,10 @@ class IngredientPipeline:
                     quantity=row["quantity"],
                     measurement_unit=row["measurement_unit"],
                     recipe_id=row["recipe_id"],
+                    calories=row["calories"],
+                    fat=row["fat"],
+                    carbs=row["carbs"],
+                    protein=row["protein"],
                 )
                 for row in results
             ]
@@ -319,3 +383,52 @@ class IngredientPipeline:
                 f"Database error fetching shopping list for recipe {recipe_id}: {e}"
             )
             raise DatabaseError(f"Failed to fetch shopping list: {str(e)}")
+
+    def add_recipe_detail(self, recipe: RecipeDetail):
+        """Add recipe to database"""
+        try:
+            conn = self._get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                INSERT INTO Recipe
+                (name, category, cuisine_type, cooking_time, difficulty_level)
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                [recipe.name, recipe.category, recipe.cuisine_type,
+                 recipe.cooking_time, recipe.difficulty_level]
+            )
+            conn.commit()
+            conn.close()
+            recipe_id = cursor.lastrowid
+            self._add_ingredient_detail(recipe.ingredients, recipe_id)
+
+            return recipe_id
+        except sqlite3.Error as e:
+            logger.error(f"Database error adding recipe {recipe.name}: {e}")
+            raise DatabaseError(f"Failed to fetch recipe: {str(e)}")
+
+    def _add_ingredient_detail(self, ingredients: List[IngredientPartial], recipe_id: int):
+        """Add recipe to database"""
+        try:
+            conn = self._get_db_connection()
+            cursor = conn.cursor()
+            for ingredient in ingredients:
+                cursor.execute(
+                    """
+                    INSERT INTO Ingredient
+                    (name, quantity, measurement_unit, recipe_id)
+                    VALUES (?, ?, ?, ?)
+                    """,
+                    [ingredient.name, ingredient.quantity,
+                     ingredient.measurement_unit, recipe_id]
+                )
+                conn.commit()
+            conn.close()
+            for ingredient in ingredients:
+                product = self.find_kroger_product(ingredient.name)
+                self.save_kroger_product(product)
+            logger.info(f"Added {ingredient.name}")
+        except sqlite3.Error as e:
+            logger.error(f"Database error adding recipe {ingredient.name}: {e}")
+            raise DatabaseError(f"Failed to fetch recipe: {str(e)}")

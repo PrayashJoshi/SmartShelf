@@ -3,12 +3,13 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from populate import Populate
 from dotenv import load_dotenv
-from routers import users, recipes, receipts
+from routers import users, recipes, receipts, facts
 
 app = FastAPI()
 app.include_router(router=users.router)
 app.include_router(router=receipts.router)
 app.include_router(router=recipes.router)
+app.include_router(router=facts.router)
 
 origins = [
     "http://localhost",

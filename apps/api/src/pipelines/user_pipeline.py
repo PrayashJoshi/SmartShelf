@@ -63,7 +63,7 @@ class UserPipeline:
         try:
             res = cursor.execute(
                 """
-                SELECT user_id, name, email from User
+                SELECT user_id, name, email, admin from User
                 WHERE email = ?
                 AND password= ?;
                 """,
@@ -97,6 +97,28 @@ class UserPipeline:
             raise e
         finally:
             cursor.commit()
+            conn.close()
+
+    def get_max_and_min(self) -> List[int]:
+        conn = self._get_db_connection()
+        cursor = conn.cursor()
+        try:
+            res = cursor.execute(
+                """
+                SELECT MIN(count) as min, MAX(count) as max, AVG(count) as avg
+                FROM (
+                   SELECT strftime('%m, %Y', reg_date) AS signup_date,
+                   strftime('%Y', reg_date) AS year, Count(*) as count
+                   FROM User GROUP BY signup_date ORDER BY year
+                );
+                """
+            )
+            column_names = [description[0] for description in cursor.description]
+            result = [dict(zip(column_names, row)) for row in res.fetchall()]
+            return result
+        except Exception as e:
+            logger.error(f"Cannot fetch monthly statistics {e}")
+        finally:
             conn.close()
 
     def get_monthly_signups(self) -> List[MonthlyStatDetail]:

@@ -3,11 +3,11 @@ import Login from '../views/LoginView.vue';
 import { store } from '../store';
 import Upload from '../views/UploadView.vue';
 import NewUser from '../views/NewUserView.vue';
-import AdminLogin from '../app/AdminLogin.vue';
 import AdminView from '../views/AdminView.vue';
 import ReceiptView from '../views/ReceiptView.vue';
 import HomeView from '../views/HomeView.vue';
 import ProfileView from '../views/ProfileView.vue';
+import ShoppingListView from '../views/ShoppingListView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -46,9 +46,9 @@ const router = createRouter({
       component: ProfileView
     },
     {
-      path: '/admin',
-      name: 'admin',
-      component: AdminLogin
+      path: '/shoppinglist',
+      name: 'shoppinglist',
+      component: ShoppingListView
     },
     {
       path: '/admin/dash',

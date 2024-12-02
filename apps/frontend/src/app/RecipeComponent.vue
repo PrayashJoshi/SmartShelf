@@ -3,6 +3,7 @@
   import { store } from "../store"
 
   const recipes = shallowRef([])
+  const stats = shallowRef()
   const ingredients = shallowRef([])
   const modalRecipe = shallowRef()
   const displayModal = ref(false)
@@ -33,6 +34,7 @@
       await fetch(`http://127.0.0.1:8000/api/v1/recipes/${recipe.recipe_id}/ingredients`)
     ).json()
     ingredients.value = ingredientData
+    console.log(stats.value)
 
     toggle()
   }
@@ -68,6 +70,8 @@
         return '🇮🇩'
       case 'Chinese':
         return '🇨🇳'
+      default:
+        return '🇺🇳'
 
     }
 
@@ -126,12 +130,31 @@
             </div>
             <!-- Modal body -->
             <div class="p-4 md:p-5 space-y-4">
-                <img class="align-center max-w-64" :src="imgSrc"/>
                 <ul v-for="(ingredient, i) in ingredients"
                     :key="ingredient.name+i">
-                  <li class="grid grid-cols-3">
-                      <span class="span-cols-2">{{ingredient.name}}</span>
+                  <li class="grid grid-cols-4">
+                      <span>{{ingredient.name}}</span>
                       <span>{{ingredient.quantity}} {{ingredient.measurement_unit}}</span>
+                      <div class="grid col-span-2" >
+                        <table class="table-auto">
+                          <thead class="text-center">
+                            <tr>
+                              <th>Calories</th>
+                              <th>Fat</th>
+                              <th>Carbs</th>
+                              <th>Protein</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr class="text-center">
+                              <td>{{ingredient.calories}}</td>
+                              <td>{{ingredient.fat}}</td>
+                              <td>{{ingredient.carbs}}</td>
+                              <td>{{ingredient.protein}}</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
                   </li>
                 </ul>
                 <button class="w-full lg:inline mt-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-white">

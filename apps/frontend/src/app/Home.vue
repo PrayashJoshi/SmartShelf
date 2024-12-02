@@ -16,6 +16,11 @@ async function handleReceiptClick() {
   await router.push('/receipt') 
 }
 
+async function handleListClick() {
+  console.log(store.loggedIn)
+  await router.push('/shoppinglist') 
+}
+
 function toggle() {
     test.value = !test.value
     console.log("hi")
@@ -47,7 +52,7 @@ function toggle() {
       </div>
     </button>
 
-    <button @click=handleUploadClick class="w-full max-h-32 bg-sky-500 px-4
+    <button @click=handleListClick class="w-full max-h-32 bg-sky-500 px-4
         grid place-content-center grid-cols-2 mt-8 mb-8 rounded-md group
         hover:scale-105 hover:shadow-md">
       <div class="flex flex-col align-middle justify-center">
@@ -55,7 +60,7 @@ function toggle() {
           View Shopping List
         </h2>
         <p class="text-xs text-white text-left font-thin sm:text-sm">
-          See what you need to buy from Kroger! 
+          See what you need to buy from Kroger
         </p>
       </div>
       <div class="flex pb-8 h-48 align-center justify-center">

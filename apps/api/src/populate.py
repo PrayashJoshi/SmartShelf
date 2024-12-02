@@ -3,7 +3,7 @@ import csv
 import logging
 import os
 from pipelines.nutrition_pipeline import NutritionPipeline
-from pipelines.kroger_pipeline import KrogerPipeline, IngredientDetail
+from pipelines.ingredient_pipeline import IngredientPipeline, IngredientDetail
 
 logger = logging.getLogger("")
 logging.basicConfig(format="%(levelname)s:\t  %(message)s", level=logging.DEBUG)
@@ -24,7 +24,7 @@ class Populate:
     """Prepopulates the database with data"""
 
     def __init__(self):
-        self.conn = sqlite3.connect("src/smartshelf.db")
+        self.conn = sqlite3.connect("smartshelf.db")
         self.conn.row_factory = sqlite3.Row
         self.cursor = self.conn.cursor()
         logger.info("Initializing Database")
@@ -44,7 +44,7 @@ class Populate:
                 email TEXT UNIQUE,
                 password TEXT,
                 reg_date DATE,
-                admin INTEGER
+                admin INTEGER DEFAULT 0
             );
             CREATE TABLE IF NOT EXISTS Recipe (
                 recipe_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -132,7 +132,7 @@ class Populate:
         try:
             self.cursor.executescript(
                 """
-              INSERT INTO User (name, email, password, reg_date, is_admin) VALUES
+              INSERT INTO User (name, email, password, reg_date, admin) VALUES
                 ('Alice Johnson', 'alice.johnson@example.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '2024-05-14', 1),
                 ('Bob Smith', 'bob.smith@example.com', '84b43eab377df65e0f868d1eda345794d09faeb6cf5ddaa70fb2257a29ef2e85', '2024-03-10', 0),
                 ('Charlie Brown', 'charlie.brown@example.com', '6cf2cedd09facbb89bbd79ff4e03f681dc35c0cc2b2f57fb3d870c33e4bdde1c', '2024-07-19', 0),
@@ -284,20 +284,13 @@ class Populate:
         client_id = os.getenv("KROGER_CLIENT_ID")
         client_secret = os.getenv("KROGER_CLIENT_SECRET")
         location_id = os.getenv("KROGER_LOCATION_ID", "02900210")
-        pipeline = KrogerPipeline(
+        pipeline = IngredientPipeline(
             client_id=client_id,
             client_secret=client_secret,
             location_id=location_id
         )
-        res = self.cursor.execute(
-                "SELECT DISTINCT * from Ingredient WHERE name ='Cheddar Cheese';"
-                )
-        ingredient = res.fetchone()
-        thing = IngredientDetail(ingredient["ingredient_id"],
-                                 ingredient["name"],
-                                 ingredient["quantity"],
-                                 ingredient["measurement_unit"],
-                                 ingredient["recipe_id"])
-        print(thing)
-        product = pipeline.find_kroger_product(thing)
-        print(product)
+        if pipeline.check_populated():
+            logger.info("Already populated")
+            return
+        for i in range(1, 30):
+            pipeline.process_recipe(i)
