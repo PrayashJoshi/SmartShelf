@@ -4,6 +4,8 @@
 dist
 tmp
 /out-tsc
+**/__pycache__/
+*.pyc
 
 # dependencies
 node_modules
@@ -41,5 +43,7 @@ Thumbs.db
 .nx/cache
 .nx/workspace-data
 
-apps/api/dbms_api
-apps/api/src/__pycache__
+/apps/api/dbms_api
+
+/apps/api/src/.env
+/apps/api/src/smartshelf.db

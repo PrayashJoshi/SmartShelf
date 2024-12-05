@@ -15,6 +15,7 @@ import Home from '../app/Home.vue'
     margin-left: auto;
     margin-right: auto;
     padding: 0 1rem;
+    height: 1dvh
   }
 }
 </style>

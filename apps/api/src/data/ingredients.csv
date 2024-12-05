@@ -1,0 +1,341 @@
+name,Name,quantity,unit,recipe_id
+Spaghetti,Spaghetti,8,oz,1
+Large Egg,Large Egg,2,,1
+Parmesan Cheese,Parmesan Cheese,0.5,cup,1
+Bacon,Bacon,4,slices,1
+Garlic,Garlic,4,cloves,1
+Parsely,Parsely,2,tbsp,1
+Boneless Ribeye,Boneless Ribeye,1.2,lb,2
+Vegetable Oil,Vegetable Oil,2,tbsp,2
+Onion,Onion,1,,2
+Mushrooms,Mushrooms,10,oz,2
+Butter,Butter,3,tbsp,2
+Flour,Flour,2,tbsp,2
+Beef Broth,Beef Broth,2,cup,2
+Dijon Mustard,Dijon Mustard,1,tbsp,2
+Sour Cream,Sour Cream,0.66,cup,2
+Romain Lettuce,Romain Lettuce,2,bunch,3
+Cubed Bread,Cubed Bread,0.5,cup,3
+Caesar Dressing,Caesar Dressing,2,cup,3
+Radish,Radish,2,,3
+Roasted Chickpeas,Roasted Chickpeas,1.5,cup,3
+Parmesan Cheese,Parmesan Cheese,0.33,cup,3
+Chives,Chives,2,tbsp,3
+Pinenuts,Pinenuts,2,tbsp,3
+all-purpose flour,All-Purpose Flour,1.5,cup,4
+baking powder,Baking Powder,3.5,tsps,4
+white sugar,White Sugar,1,tbsp,4
+salt,Salt,0.25,tsps,4
+milk,Milk,1.25,cup,4
+butter,Butter,3,tbsp,4
+egg,Egg,1,,4
+"olive oil, extra virgin","Olive Oil, Extra Virgin",0.25,cup,5
+onion,Onion,1,,5
+bell pepper,Bell Pepper,1,,5
+garlic,Garlic,4,cloves,5
+tomato,Tomato,3,,5
+bay leaf,Bay Leaf,1,,5
+white wine,White Wine,0.25,cup,5
+boneless skinless chicken thighs,Boneless Skinless Chicken Thighs,4,,5
+Parsely,Parsely,0.25,,5
+spanish rice,Spanish Rice,2,cup,5
+chicken broth,Chicken Broth,5,cup,5
+frozen peas,Frozen Peas,0.5,cup,5
+jumbo shrimp,Jumbo Shrimp,0.5,lb,5
+muscles,Muscles,0.5,lb,5
+calamari ring,Calamari Ring,8,oz,5
+eggplant,Eggplant,1,,6
+sea salt,Sea Salt,1,pinch,6
+"olive oil, extra virgin","Olive Oil, Extra Virgin",6,tbsp,6
+zucchini,Zucchini,2,,6
+yellow onion,Yellow Onion,1,,6
+yellow bell pepper,Yellow Bell Pepper,1,,6
+garlic,Garlic,3,cloves,6
+tomato,Tomato,1,lb,6
+red pepper flakes,Red Pepper Flakes,1,pinch,6
+cane sugar,Cane Sugar,1,pinch,6
+white wine vinegar,White Wine Vinegar,1,tbsp,6
+thyme,Thyme,2,leaves,6
+black pepper,Black Pepper,1,,6
+basil,Basil,0.25,cup,6
+white corn tortillas,White Corn Tortillas,24,,7
+tilapia,Tilapia,1.5,lb,7
+ground cumin,Ground Cumin,0.5,tsps,7
+cayenne pepper,Cayenne Pepper,0.5,tsps,7
+salt,Salt,1,tsps,7
+black pepper,Black Pepper,0.24,tsps,7
+olive oil,Olive Oil,1,tbsp,7
+"butter, unsalted","Butter, Unsalted",1,tbsp,7
+purple cabbage,Purple Cabbage,0.5,,7
+avocado,Avocado,2,,7
+tomato,Tomato,2,,7
+red onion,Red Onion,0.5,,7
+cilantro,Cilantro,0.5,bunch,7
+"cotjia cheese, grated","Cotjia Cheese, Grated",4,oz,7
+lime,Lime,1,,7
+pad thai rice noodles,Pad Thai Rice Noodles,4,oz,8
+tamarind puree,Tamarind Puree,1.5,tbsp,8
+brown sugar,Brown Sugar,3,tbsp,8
+fish sauce,Fish Sauce,2,tbsp,8
+oyster sauce,Oyster Sauce,1.5,tbsp,8
+Vegetable Oil,Vegetable Oil,3,tbsp,8
+Onion,Onion,0.5,,8
+Garlic,Garlic,2,cloves,8
+chicken breast,Chicken Breast,5,oz,8
+eg,Eg,2,,8
+beansprouts,Beansprouts,1.5,cup,8
+firm tofu,Firm Tofu,0.5,cup,8
+garlic chives,Garlic Chives,0.25,cup,8
+peanuts,Peanuts,0.25,cup,8
+all-purpose flour,All-Purpose Flour,2,cup,9
+sugar,Sugar,2,cup,9
+unsweetened cocoa powder,Unsweetened Cocoa Powder,0.75,cup,9
+baking powder,Baking Powder,2,tsps,9
+baking soda,Baking Soda,1.5,tsps,9
+kosher salt,Kosher Salt,1,tsps,9
+expresso powder,Expresso Powder,1,tsps,9
+milk,Milk,1,cup,9
+vegetable oil,Vegetable Oil,0.5,cup,9
+egg,Egg,2,,9
+vanilla extract,Vanilla Extract,2,cup,9
+water,Water,1,cup,9
+sweet rice flour,Sweet Rice Flour,1,cup,10
+water,Water,1,cup,10
+sugar,Sugar,0.25,cup,10
+potato starch,Potato Starch,,,10
+sushi seaweed,Sushi Seaweed,6,sheet,11
+sushi rice,Sushi Rice,3,cup,11
+salmon,Salmon,0.5,lb,11
+cream cheese,Cream Cheese,4,oz,11
+avocado,Avocado,1,,11
+"butter, salted","Butter, Salted",1,cup,12
+granulated sugar,Granulated Sugar,1,cup,12
+brown sugar,Brown Sugar,1,cup,12
+vanilla extract,Vanilla Extract,2,tsps,12
+egg,Egg,2,,12
+all-purpose flour,All-Purpose Flour,3,cup,12
+baking soda,Baking Soda,1,tsps,12
+baking powder,Baking Powder,0.5,tsps,12
+sea salt,Sea Salt,1,tsps,12
+chocolate chips,Chocolate Chips,2,cup,12
+falafel balls,Falafel Balls,16,balls,13
+pita bread,Pita Bread,4,slices,13
+hummus,Hummus,0.75,cup,13
+pickled onions,Pickled Onions,1,,13
+lettuce,Lettuce,1,,13
+tomato,Tomato,1,,13
+pickles,Pickles,1,,13
+olive oil,Olive Oil,2,tbsp,14
+butter,Butter,2,tbsp,14
+mushrooms,Mushrooms,8,oz,14
+chicken breast,Chicken Breast,0.75,lb,14
+salt,Salt,1,pinch,14
+black pepper,Black Pepper,1,pinch,14
+white wine,White Wine,0.5,c,14
+butter,Butter,1,tbsp,14
+garlic,Garlic,3,cloves,14
+chicken broth,Chicken Broth,6,cup,14
+soy sauce,Soy Sauce,2,tbsp,14
+hot sauce,Hot Sauce,2,tbsp,14
+honey,Honey,2,tsps,14
+sesame seed oil,Sesame Seed Oil,0.75,tsps,14
+noodles,Noodles,3,oz,14
+bok choy,Bok Choy,6,,14
+onion powder,Onion Powder,0.75,tsps,14
+mustard powder,Mustard Powder,0.75,tsps,14
+ginger,Ginger,0.25,tsps,14
+white pepper,White Pepper,0.125,tsps,14
+red pepper flakes,Red Pepper Flakes,1,pinch,14
+olive oil,Olive Oil,2,tbsp,15
+yellow onion,Yellow Onion,1,cup,15
+ground beef,Ground Beef,1,lb,15
+Parsely,Parsely,2,tsps,15
+rosemary,Rosemary,1,tsps,15
+thyme,Thyme,1,tsps,15
+salt,Salt,0.5,tsps,15
+black pepper,Black Pepper,0.5,tsps,15
+worcestershire sauce,Worcestershire Sauce,1,tbsp,15
+garlic,Garlic,2,cloves,15
+all-purpose flour,All-Purpose Flour,2,tbsp,15
+tomato paste,Tomato Paste,2,tbsp,15
+Beef Broth,Beef Broth,1,cup,15
+frozen mixed peas and carrots,Frozen Mixed Peas And Carrots,1,cup,15
+corn kernels,Corn Kernels,0.5,cup,15
+pizza dough,Pizza Dough,1,can,16
+marinara sauce,Marinara Sauce,0.5,cup,16
+mozzarella cheese,Mozzarella Cheese,8,oz,16
+tomato,Tomato,0.5,cup,16
+basil,Basil,10,leaves,16
+red pepper flakes,Red Pepper Flakes,1,,16
+"olive oil, extra virgin","Olive Oil, Extra Virgin",1,drizzle,16
+ricotta cheese,Ricotta Cheese,15,oz,17
+egg,Egg,1,,17
+mozzarella cheese,Mozzarella Cheese,2,cup,17
+Parmesan Cheese,Parmesan Cheese,0.75,cup,17
+italian seasoning,Italian Seasoning,2,tsps,17
+salt,Salt,0.5,tsps,17
+pepper,Pepper,0.25,tsps,17
+olive oil,Olive Oil,1,tbsp,17
+onion,Onion,1,,17
+ground beef,Ground Beef,0.75,lb,17
+ground italian sausage,Ground Italian Sausage,0.75,l,17
+garlic,Garlic,3,cloves,17
+chicken broth,Chicken Broth,0.5,cup,17
+marinara sauce,Marinara Sauce,40,oz,17
+hot sauce,Hot Sauce,1,tsps,17
+worcestershire sauce,Worcestershire Sauce,1,tsps,17
+lasagna noodles,Lasagna Noodles,12,,17
+tomato paste,Tomato Paste,1,tbsp,17
+chicken breast,Chicken Breast,1,l,18
+soy sauce,Soy Sauce,2,tbsp,18
+fish sauce,Fish Sauce,0.5,tbsp,18
+lime,Lime,2,tbsp,18
+honey,Honey,1,tbsp,18
+sriracha sauce,Sriracha Sauce,1,tbsp,18
+ginger,Ginger,2,tsps,18
+garlic,Garlic,2,cloves,18
+butter,Butter,3,tbsp,19
+egg,Egg,2,,19
+frozen mixed peas and carrots,Frozen Mixed Peas And Carrots,2,cup,19
+onion,Onion,1,,19
+garlic,Garlic,3,cloves,19
+salt,Salt,1,,19
+black pepper,Black Pepper,1,,19
+rice,Rice,4,cup,19
+green onion,Green Onion,3,,19
+soy sauce,Soy Sauce,4,tbsp,19
+oyster sauce,Oyster Sauce,2,tsps,19
+sesame seed oil,Sesame Seed Oil,0.5,tsps,19
+vegetable oil,Vegetable Oil,1.5,tbsp,20
+garlic,Garlic,2,cloves,20
+onion,Onion,0.5,,20
+chicken breast,Chicken Breast,10,oz,20
+carrot,Carrot,2,,20
+bell pepper,Bell Pepper,1,,20
+green onion,Green Onion,6,,20
+noodles,Noodles,1,lb,20
+water,Water,0.25,cup,20
+cornstarch,Cornstarch,4,tsps,20
+soy sauce,Soy Sauce,4,tbsp,20
+mirin,Mirin,1,tbsp,20
+sugar,Sugar,1,tsps,20
+sesame seed oil,Sesame Seed Oil,0.5,tsps,20
+white pepper,White Pepper,0.25,tsps,20
+graham cracker crumbs,Graham Cracker Crumbs,1.5,cup,21
+sugar,Sugar,18,tbsp,21
+brown sugar,Brown Sugar,1,tbsp,21
+butter,Butter,7,tbsp,21
+cream cheese,Cream Cheese,32,oz,21
+Sour Cream,Sour Cream,0.66,cup,21
+vanilla extract,Vanilla Extract,1.5,tsps,21
+salt,Salt,0.125,tsps,21
+egg,Egg,4,,21
+olive oil,Olive Oil,2,tbsp,22
+onion,Onion,1,,22
+bell pepper,Bell Pepper,1,,22
+garlic,Garlic,4,cloves,22
+paprika,Paprika,2,tsps,22
+cumin,Cumin,1,tsps,22
+chili powder,Chili Powder,0.25,tsps,22
+tomato,Tomato,1,,22
+egg,Egg,6,,22
+salt,Salt,1,,22
+pepper,Pepper,1,,22
+cilantro,Cilantro,1,bunch,22
+Parsely,Parsely,1,bunch,22
+chicken breast,Chicken Breast,2,lb,23
+egg,Egg,3,,23
+cornstarch,Cornstarch,6.28,tbsp,23
+flour,Flour,0.33,cup,23
+salt,Salt,1,,23
+vegetable oil,Vegetable Oil,1,,23
+orange juice,Orange Juice,1,cup,23
+sugar,Sugar,0.5,cup,23
+white wine vinegar,White Wine Vinegar,2,tbsp,23
+soy sauce,Soy Sauce,2,tbsp,23
+ginger,Ginger,0.25,tsps,23
+garlic,Garlic,0.25,tsps,23
+red pepper flakes,Red Pepper Flakes,0.5,tsps,23
+orange zest,Orange Zest,1,,23
+chicken broth,Chicken Broth,4,cup,24
+sesame seed oil,Sesame Seed Oil,0.5,tsps,24
+salt,Salt,0.75,tsps,24
+sugar,Sugar,0.125,tsps,24
+white pepper,White Pepper,0.125,tsps,24
+turmeric,Turmeric,0.5,tsps,24
+cornstarch,Cornstarch,3,tbsp,24
+egg,Egg,3,,24
+scallion,Scallion,1,,24
+msg,Msg,0.25,tsps,24
+"butter, unsalted","Butter, Unsalted",4,tbsp,25
+yellow onion,Yellow Onion,1,,25
+sea salt,Sea Salt,0.5,tsps,25
+black pepper,Black Pepper,1,,25
+garlic,Garlic,3,cloves,25
+all-purpose flour,All-Purpose Flour,0.25,cup,25
+milk,Milk,2,cup,25
+chicken broth,Chicken Broth,2,cup,25
+broccoli,Broccoli,3,cup,25
+carrot,Carrot,1,,25
+Dijon Mustard,Dijon Mustard,0.5,tsps,25
+cheddar cheese,Cheddar Cheese,8,oz,25
+black beans,Black Beans,3,cup,26
+yellow onion,Yellow Onion,0.33,cup,26
+garlic,Garlic,2,cloves,26
+chipotle peppers,Chipotle Peppers,2,,26
+adobo sauce,Adobo Sauce,2,tbsp,26
+tamarind puree,Tamarind Puree,1,tbsp,26
+balsamic vinegar,Balsamic Vinegar,1,tbsp,26
+cumin,Cumin,1,tsps,26
+sea salt,Sea Salt,0.5,tsps,26
+black pepper,Black Pepper,0.5,tsps,26
+egg,Egg,1,,26
+panko bread crumbs,Panko Bread Crumbs,1,cup,26
+"olive oil, extra virgin","Olive Oil, Extra Virgin",1,tbsp,26
+egg,Egg,6,,27
+milk,Milk,0.25,cup,27
+garlic,Garlic,2,cloves,27
+sea salt,Sea Salt,0.25,tsps,27
+black pepper,Black Pepper,1,tsps,27
+"olive oil, extra virgin","Olive Oil, Extra Virgin",1,tsps,27
+scallion,Scallion,6,,27
+broccoli,Broccoli,2,cup,27
+paprika,Paprika,0.125,tsps,27
+feta cheese,Feta Cheese,0.25,cup,27
+olive oil,Olive Oil,2,cup,28
+yellow onion,Yellow Onion,1,,28
+chicken breast,Chicken Breast,1,lb,28
+garlic,Garlic,3,cloves,28
+ginger,Ginger,2,tsps,28
+coriander,Coriander,2,tsps,28
+coconut milk,Coconut Milk,13,oz,28
+carrot,Carrot,1,cup,28
+curry powder,Curry Powder,1,tbsp,28
+salt,Salt,1,tsps,28
+black pepper,Black Pepper,0.25,tsps,28
+spinach,Spinach,3,cup,28
+lime juice,Lime Juice,1,tbsp,28
+brown sugar,Brown Sugar,1,tbsp,28
+cilantro,Cilantro,0.25,cup,28
+phyllo dough,Phyllo Dough,16,oz,29
+"butter, unsalted","Butter, Unsalted",1.25,cup,29
+walnut,Walnut,1,lb,29
+ground cinnamon,Ground Cinnamon,1,tsps,29
+sugar,Sugar,1,cup,29
+lemon juice,Lemon Juice,2,tbsp,29
+water,Water,0.75,cup,29
+honey,Honey,0.5,cup,29
+chocolate chips,Chocolate Chips,1,cup,29
+butter,Butter,0.5,tbsp,30
+celery,Celery,2,,30
+carrot,Carrot,3,,30
+garlic,Garlic,1,cloves,30
+chicken broth,Chicken Broth,10,cup,30
+salt,Salt,1,tsps,30
+black pepper,Black Pepper,0.5,tsps,30
+rosemary,Rosemary,0.125,tsps,30
+sage,Sage,0.125,tsps,30
+red pepper flakes,Red Pepper Flakes,0.125,tsps,30
+noodles,Noodles,4,cup,30
+chicken breast,Chicken Breast,3,lb,30
+msg,Msg,1,tsps,30
