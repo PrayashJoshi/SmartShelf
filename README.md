@@ -13,7 +13,7 @@ Would recommend creating an alias for the command `npx nx` because that is the c
 
 Eventually we will implement additional commands to build for Docker
 
-### Commands For Flask Server
+### Commands For FastAPI Server
 - `nx serve api` - Starts server
 - `nx setup-venv api` - Installs requirements from pip and sets up venv (if it doesnt exist)
 
